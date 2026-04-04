@@ -1,8 +1,12 @@
 package com.pixeldev.composetv.presentation.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,10 +22,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -81,70 +91,68 @@ fun VideoCardStd(
 }
 
 @Composable
-fun VideoCard(
+fun VideoCardStdFocus(
     video: VideoEntity,
-    viewModel: VideoViewModel, modifier: Modifier = Modifier
+    viewModel: VideoViewModel,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = {},
-        scale = CardDefaults.scale(focusedScale = 1.05f),
+    var isFocused by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.1f else 1f,
+        label = "cardScale"
+    )
+
+    val textColor by animateColorAsState(
+        targetValue = if (isFocused) Color.White else Color.LightGray,
+        label = "textColor"
+    )
+
+    Column(
+        modifier = modifier
+            .width(180.dp)
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
     ) {
-        Column(
-            modifier = modifier.width(180.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                AsyncImage( // Use Coil or similar for loading images
+
+        // 🔥 PASS FOCUS STATE HERE
+        CompactCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = if (isFocused) 2.dp else 0.dp,
+                    color = if (isFocused) Color.White else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                ),
+
+            image = {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f),
                     model = video.card,
                     contentDescription = video.title,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
                 )
-                // Play icon overlay bottom-left
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Play",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .align(Alignment.BottomStart)
-                        .padding(6.dp)
-                        .background(Color(0x80000000), shape = CircleShape)
-                )
-                // Duration label bottom-right
-                /*if (!video.duration.isNullOrEmpty()) {
-                    Text(
-                        text = video.duration,
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(6.dp)
-                            .background(Color(0x80000000), shape = RoundedCornerShape(4.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }*/
-            }
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = video.title,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = video.description,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.Gray,
-                fontSize = 12.sp,
-            )
-        }
+            },
+            title = {
+                Spacer(modifier = Modifier.height(0.dp))
+            },
+            onClick = {}
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = video.title,
+            color = textColor,
+            fontSize = if (isFocused) 15.sp else 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

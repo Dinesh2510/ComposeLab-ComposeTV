@@ -35,47 +35,63 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.pixeldev.composetv.core.ResultState
 import com.pixeldev.composetv.data.local.entity.VideoEntity
-import com.pixeldev.composetv.presentation.components.ExitDialog
-import com.pixeldev.composetv.presentation.components.VideoCard
+import com.pixeldev.composetv.presentation.components.ExitDialogOverlay
 import com.pixeldev.composetv.presentation.components.VideoCardStd
+import com.pixeldev.composetv.presentation.components.VideoCardStdFocus
 import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
 
 @Composable
 fun HomeScreen(
     viewModel: VideoViewModel = hiltViewModel()
 ) {
-
     val videos by viewModel.videos.collectAsState()
-    val state by viewModel.syncState.collectAsState()
     var showExitDialog by remember { mutableStateOf(false) }
 
-    /* Column() {
-
-         WishlistScreen()
-         Text("=======================================")
-         Button({ showExitDialog = true}) {Text("asljhgf") }
-         VideoList(videos, viewModel)
-     }*/
     val groupedVideos = videos.groupBy { it.category }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer { clip = false }, // 🔥 instead of clipToBounds
-        contentPadding = PaddingValues(vertical = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        groupedVideos.forEach { (category, videoList) ->
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // 🔹 MAIN CONTENT
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { clip = false },
+            contentPadding = PaddingValues(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+
+            // Button
             item {
-                CategoryRow(
-                    title = category,
-                    videos = videoList,
-                    viewModel = viewModel
-                )
+                Button(
+                    onClick = { showExitDialog = true },
+                    modifier = Modifier.padding(start = 64.dp)
+                ) {
+                    Text("Open Dialog")
+                }
+            }
+
+            // Categories
+            groupedVideos.forEach { (category, videoList) ->
+                item {
+                    CategoryRow(
+                        title = category,
+                        videos = videoList,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
-    }
 
+        // 🔥 DIALOG (OUTSIDE LazyColumn)
+        ExitDialogOverlay(
+            show = showExitDialog,
+            onDismiss = { showExitDialog = false },
+            onPrimaryClick = {
+                showExitDialog = false
+                // TODO: exit logic
+            }
+        )
+    }
 }
 @Composable
 fun CategoryRow(
@@ -129,10 +145,11 @@ fun CategoryRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(videos.size) { video ->
-                VideoCardStd(videos[video], viewModel)
+                VideoCardStdFocus(videos[video], viewModel)
             }
         }
     }
+
 }
 /*
 *
@@ -140,19 +157,6 @@ fun CategoryRow(
         showExitDialog = true
     }
 
-    if (showExitDialog) {
-        ExitDialog(
-            message = "Are you sure you want to exit?",
-            primaryButtonText = "Exit",
-            onPrimaryClick = {
-                // Handle exit
-                showExitDialog = false
-                // call activity.finish() or navController.popBackStack() etc.
-            },
-            onDismiss = {
-                showExitDialog = false
-            }
-        )
-    }
+
 
 * */
