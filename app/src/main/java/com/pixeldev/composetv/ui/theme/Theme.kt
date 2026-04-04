@@ -2,6 +2,7 @@ package com.pixeldev.composetv.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.darkColorScheme
@@ -27,7 +28,12 @@ fun ComposeTvDemoTheme(
         )
     }
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = darkColorScheme(
+            background = PrimeBackground,
+            surface = PrimeSurface,
+            primary = PrimeAccent,
+            onPrimary = Color.White
+        ),
         typography = Typography,
         content = content
     )

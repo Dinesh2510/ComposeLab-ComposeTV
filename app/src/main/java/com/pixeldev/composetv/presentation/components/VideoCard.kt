@@ -110,7 +110,7 @@ fun VideoCardStdFocus(
 
     Column(
         modifier = modifier
-            .width(180.dp)
+            .width(200.dp)
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
             .graphicsLayer {
