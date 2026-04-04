@@ -24,43 +24,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.pixeldev.composetv.DataStoreManager
 import com.pixeldev.composetv.R
 import com.pixeldev.composetv.presentation.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 @Composable
 fun OnboardingScreen(navController: NavController) {
 
-    val context = LocalContext.current
-    val dataStore = remember { DataStoreManager(context) }
+    val viewModel: OnboardingViewModel = hiltViewModel()
 
     var page by remember { mutableStateOf(0) }
-
     val focusRequester = remember { FocusRequester() }
 
     val pages = listOf(
-        Triple(
-            "Welcome",
-            "Experience the best TV app",
-            R.drawable.app_banner
-        ),
-        Triple(
-            "Unlimited Content",
-            "Watch anytime anywhere",
-            R.drawable.app_banner
-        ),
-        Triple(
-            "Get Started",
-            "Enjoy seamless experience",
-            R.drawable.app_banner
-        )
+        Triple("Welcome", "Experience the best TV app", R.drawable.app_banner),
+        Triple("Unlimited Content", "Watch anytime anywhere", R.drawable.app_banner),
+        Triple("Get Started", "Enjoy seamless experience", R.drawable.app_banner)
     )
 
     LaunchedEffect(Unit) {
@@ -90,8 +75,7 @@ fun OnboardingScreen(navController: NavController) {
             Image(
                 painter = painterResource(id = pages[page].third),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(180.dp)
+                modifier = Modifier.size(180.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -117,9 +101,7 @@ fun OnboardingScreen(navController: NavController) {
                     if (page < pages.lastIndex) {
                         page++
                     } else {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            dataStore.setOnboardingDone()
-                        }
+                        viewModel.completeOnboarding()   // ✅ clean
 
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Onboarding.route) {
@@ -128,15 +110,10 @@ fun OnboardingScreen(navController: NavController) {
                         }
                     }
                 },
-                modifier = Modifier
-                    .focusRequester(focusRequester)
+                modifier = Modifier.focusRequester(focusRequester)
             ) {
                 Text(
-                    text = when (page) {
-                        0 -> "Next"
-                        1 -> "Next"
-                        else -> "Done"
-                    }
+                    text = if (page == pages.lastIndex) "Done" else "Next"
                 )
             }
         }

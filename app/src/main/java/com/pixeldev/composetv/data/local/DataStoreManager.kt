@@ -8,9 +8,15 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore("app_prefs")
+import dagger.hilt.android.qualifiers.ApplicationContext
 
-class DataStoreManager(private val context: Context) {
+import javax.inject.Inject
+
+private val Context.dataStore by preferencesDataStore(name = "app_prefs")
+
+class DataStoreManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
 
     companion object {
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")

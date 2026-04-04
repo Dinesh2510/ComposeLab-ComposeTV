@@ -1,7 +1,13 @@
 package com.pixeldev.composetv.presentation.screens.splash
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,39 +17,84 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.tv.material3.Button
 import androidx.tv.material3.Text
-import com.pixeldev.composetv.DataStoreManager
+import com.pixeldev.composetv.R
+import com.pixeldev.composetv.core.ResultState
+import com.pixeldev.composetv.presentation.components.HotstarLoader
 import com.pixeldev.composetv.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
 
-    val context = LocalContext.current
-    val dataStore = remember { DataStoreManager(context) }
+    val viewModel: SplashViewModel = hiltViewModel()
+    val onboardingDone by viewModel.onboardingDone.collectAsState(initial = null)
+    val syncState by viewModel.syncState.collectAsState(initial = ResultState.Loading)
 
-    val onboardingDone by dataStore.onboardingDone.collectAsState(initial = false)
+    // Wait until onboarding is loaded
+    if (onboardingDone == null) return
 
-    LaunchedEffect(Unit) {
-        delay(2000)
-
-        if (onboardingDone) {
-            navController.navigate(Screen.Home.route) {
-                popUpTo(Screen.Splash.route) { inclusive = true }
-            }
-        } else {
-            navController.navigate(Screen.Onboarding.route) {
+    LaunchedEffect(syncState, onboardingDone) {
+        if (syncState is ResultState.Success) {
+            delay(500)
+            val route = if (onboardingDone == true) Screen.Home.route else Screen.Onboarding.route
+            navController.navigate(route) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
             }
         }
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
-        Text("Splash Screen", color = Color.White, fontSize = 24.sp)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Image(
+                painter = painterResource(id = R.drawable.app_banner),
+                contentDescription = "Description for accessibility", // Use null if decorative
+                modifier = Modifier
+                    .width(312.dp)
+                    .height(180.dp)
+            )
+            Text(
+                text = "JET STREAM",
+                color = Color.White,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (syncState) {
+                is ResultState.Loading -> HotstarLoader() // your cute loader below title
+
+                is ResultState.Error -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Failed to load data", color = Color.Red)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { viewModel.retry() }) {
+                            Text("Retry")
+                        }
+                    }
+                }
+
+                is ResultState.Success -> {
+                    HotstarLoader() // keep loader visible until navigation
+                }
+            }
+        }
     }
 }

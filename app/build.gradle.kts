@@ -59,6 +59,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    //Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
@@ -66,6 +67,11 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.auth)
     implementation(libs.kotlinx.serialization.json)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
