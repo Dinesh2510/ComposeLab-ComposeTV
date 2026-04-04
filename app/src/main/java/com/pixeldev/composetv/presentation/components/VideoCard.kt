@@ -32,6 +32,7 @@ import androidx.tv.material3.Border
 import androidx.tv.material3.Button
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
+import androidx.tv.material3.CompactCard
 import androidx.tv.material3.Icon
 import androidx.tv.material3.StandardCardContainer
 import androidx.tv.material3.Text
@@ -40,66 +41,43 @@ import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.domain.model.Video
 import com.pixeldev.composetv.presentation.screens.home.VideoViewModel
 
-/*
-@Composable
-fun VideoCard(
-    video: VideoEntity,
-    viewModel: VideoViewModel
-) {
-    Column(
-        modifier = Modifier
-            .width(200.dp)
-            .padding(8.dp)
-    ) {
-
-        AsyncImage(
-            model = video.card,
-            contentDescription = null
-        )
-
-        Text(text = video.title)
-
-        Button(onClick = {
-            viewModel.toggleWishlist(video)
-        }) {
-            Text(if (video.isWishlist) "Remove" else "Wishlist")
-        }
-    }
-}*/
 @Composable
 fun VideoCardStd(
     video: VideoEntity,
-    viewModel: VideoViewModel, modifier: Modifier = Modifier
+    viewModel: VideoViewModel,
+    modifier: Modifier = Modifier
 ) {
-    StandardCardContainer(
-        modifier = Modifier.width(180.dp),
-        imageCard = {
-            Card(
-                onClick = { },
-                interactionSource = it,
-                colors = CardDefaults.colors(containerColor = Color.Transparent)
-            ) {
+    Column(
+        modifier = modifier.width(180.dp)
+    ) {
+        CompactCard(
+            modifier = Modifier.fillMaxWidth(),
+            image = {
                 AsyncImage(
-                    // Use Coil or similar for loading images
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(CardDefaults.HorizontalImageAspectRatio),
+                        .aspectRatio(16f / 9f),
                     model = video.card,
                     contentDescription = video.title,
                     contentScale = ContentScale.Crop,
                 )
-            }
-        },
-        title = {
-            Text(
-                text = video.title,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        },
-        subtitle = {
-            Text(text = "Secondary · text")
-        },
-    )
+            },
+            title = {
+                Spacer(modifier = Modifier.height(0.dp)) // hide default title
+            },
+            onClick = {}
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = video.title,
+            color = Color.White,
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Composable
