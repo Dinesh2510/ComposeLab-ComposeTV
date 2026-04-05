@@ -60,15 +60,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // Button
-            item {
-                Button(
-                    onClick = { showExitDialog = true },
-                    modifier = Modifier.padding(start = 64.dp)
-                ) {
-                    Text("Open Dialog")
-                }
-            }
+
 
             // Categories
             groupedVideos.forEach { (category, videoList) ->
@@ -82,15 +74,7 @@ fun HomeScreen(
             }
         }
 
-        // 🔥 DIALOG (OUTSIDE LazyColumn)
-        ExitDialogOverlay(
-            show = showExitDialog,
-            onDismiss = { showExitDialog = false },
-            onPrimaryClick = {
-                showExitDialog = false
-                // TODO: exit logic
-            }
-        )
+
     }
 }
 @Composable
@@ -151,12 +135,3 @@ fun CategoryRow(
     }
 
 }
-/*
-*
-    BackHandler(enabled = showExitDialog) {
-        showExitDialog = true
-    }
-
-
-
-* */
