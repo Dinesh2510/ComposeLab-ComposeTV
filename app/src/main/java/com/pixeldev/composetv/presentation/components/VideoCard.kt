@@ -43,6 +43,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.CompactCard
+import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.StandardCardContainer
 import androidx.tv.material3.Text
@@ -153,6 +154,66 @@ fun VideoCardStdFocus(
             fontSize = if (isFocused) 15.sp else 14.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+fun VideoCard(
+    video: VideoEntity,
+    onFocused: (VideoEntity) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier.width(178.dp)
+    ) {
+
+        // 🎬 CARD
+        Card(
+            onClick = { /* TODO: Play video */ },
+            colors = CardDefaults.colors(
+                containerColor = Color.DarkGray,
+                focusedContainerColor = Color.DarkGray
+            ),
+            scale = CardDefaults.scale(focusedScale = 1.1f),
+            border = CardDefaults.border(
+                focusedBorder = Border(
+                    border = BorderStroke(3.dp, Color.White),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            ),
+            shape = CardDefaults.shape(RoundedCornerShape(12.dp)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .onFocusChanged {
+                    isFocused = it.isFocused
+                    if (it.isFocused) onFocused(video)
+                }
+        ) {
+            AsyncImage(
+                model = video.card,
+                contentDescription = video.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 🏷 TITLE (animated with focus)
+        Text(
+            text = video.title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = if (isFocused) Color.White else Color.White.copy(alpha = 0.7f),
+            fontSize = if (isFocused) 15.sp else 13.sp,
+            fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal,
+            modifier = Modifier
+                .padding(horizontal = 4.dp)
         )
     }
 }

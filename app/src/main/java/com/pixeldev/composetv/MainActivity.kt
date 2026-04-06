@@ -30,3 +30,21 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+/*// Button
+            item {
+                Button(
+                    onClick = { showExitDialog = true },
+                    modifier = Modifier.padding(start = 64.dp)
+                ) {
+                    Text("Open Dialog")
+                }
+            }
+            // 🔥 DIALOG (OUTSIDE LazyColumn)
+            ExitDialogOverlay(
+                show = showExitDialog,
+                onDismiss = { showExitDialog = false },
+                onPrimaryClick = {
+                    showExitDialog = false
+                    // TODO: exit logic
+                }
+            )*/
