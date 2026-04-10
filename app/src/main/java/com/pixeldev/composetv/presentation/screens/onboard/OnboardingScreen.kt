@@ -103,7 +103,7 @@ fun OnboardingScreen(navController: NavController) {
                     } else {
                         viewModel.completeOnboarding()   // ✅ clean
 
-                        navController.navigate(Screen.Home.route) {
+                        navController.navigate(Screen.Dashboard.route) {
                             popUpTo(Screen.Onboarding.route) {
                                 inclusive = true
                             }

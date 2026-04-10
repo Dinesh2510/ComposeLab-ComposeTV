@@ -97,38 +97,6 @@ fun HomeScreen(
    // viewModel: VideoViewModel = hiltViewModel()
 ) {
     ModernImmersiveListScreen()
-   /* val videos by viewModel.videos.collectAsState()
-    var showExitDialog by remember { mutableStateOf(false) }
-
-    val groupedVideos = videos.groupBy { it.category }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        // 🔹 MAIN CONTENT
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { clip = false },
-            contentPadding = PaddingValues(vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-
-
-            // Categories
-            groupedVideos.forEach { (category, videoList) ->
-                item {
-                    CategoryRow(
-                        title = category,
-                        videos = videoList,
-                        viewModel = viewModel
-                    )
-                }
-            }
-        }
-
-
-    }*/
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)

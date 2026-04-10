@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pixeldev.composetv.presentation.navigation.Screen
+import com.pixeldev.composetv.presentation.screens.dashboard.DashboardScreen
 import com.pixeldev.composetv.presentation.screens.home.HomeScreen
 import com.pixeldev.composetv.presentation.screens.onboard.OnboardingScreen
 import com.pixeldev.composetv.presentation.screens.splash.SplashScreen
@@ -25,8 +26,8 @@ fun TvApp() {
             OnboardingScreen(navController)
         }
 
-        composable(Screen.Home.route) {
-            HomeScreen()
+        composable(Screen.Dashboard.route) {
+            DashboardScreen()
         }
     }
 }
