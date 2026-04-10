@@ -94,56 +94,60 @@ import androidx.compose.runtime.*
 
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pixeldev.composetv.R
+import com.pixeldev.composetv.data.local.entity.VideoEntity
+import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
+
 @Composable
 fun DashboardScreen() {
     ProModalDrawerScreen()
 }
 
 
-
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ProModalDrawerScreen() {
-    val items = listOf(
-        NavigationItem("Search", Icons.Default.Search),
-        NavigationItem("Home", Icons.Default.Home),
-        NavigationItem("Movies", Icons.Default.Movie),
-        NavigationItem("Shows", Icons.Default.Tv),
-        NavigationItem("Library", Icons.Default.VideoLibrary)
-    )
+    val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var selectedIndex by remember { mutableIntStateOf(1) }
+
+    // Track current route to highlight the correct drawer item
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val menuItems = listOf(
+        Screen.Search,
+        Screen.Home,
+        Screen.Movies,
+        Screen.Shows,
+        Screen.Library
+    )
 
     val scrimBrush = Brush.horizontalGradient(
         0.0f to Color.Black.copy(alpha = 0.9f),
         0.4f to Color.Black.copy(alpha = 0.5f),
         1.0f to Color.Transparent
     )
-    // ModalNavigationDrawer uses DrawerState to manage open/closed flow
-    // On TV, it automatically opens when focus moves to the 'rail' area
+
     ModalNavigationDrawer(
-        drawerState = drawerState, // Pass the state here
+        drawerState = drawerState,
         scrimBrush = scrimBrush,
         drawerContent = { drawerValue ->
-            // This Column represents the actual drawer panel
             Column(
                 Modifier
                     .fillMaxHeight()
                     .width(if (drawerValue == DrawerValue.Open) 280.dp else 80.dp)
-                    .background(Color(0xFF0F0F0F)) // Deep dark background
+                    .background(Color(0xFF0F0F0F))
                     .padding(12.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // --- PROFILE SECTION ---
+                // --- PROFILE / HEADER ---
                 NavigationDrawerItem(
                     selected = false,
-                    onClick = {
-                        // Manual Close on click
-                        scope.launch { drawerState.setValue(DrawerValue.Closed) }
-                    },
+                    onClick = { /* Navigate to Profile */ },
                     leadingContent = {
                         Icon(Icons.Default.AccountCircle, null, Modifier.size(32.dp))
                     }
@@ -155,24 +159,37 @@ fun ProModalDrawerScreen() {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                items.forEachIndexed { index, item ->
+                // --- NAVIGATION ITEMS ---
+                menuItems.forEach { screen ->
                     NavigationDrawerItem(
-                        selected = selectedIndex == index,
-                        onClick = { selectedIndex = index
-                            // --- CLICK TO CLOSE LOGIC ---
-                            scope.launch {
-                                drawerState.setValue(DrawerValue.Closed)
-                            }},
-                        leadingContent = { Icon(item.icon, null) },
-                        // Custom colors to match the "Pro" gradient/faded look in your screenshot
-                        colors = NavigationDrawerItemDefaults.colors(
+                        selected = currentRoute == screen.route,
+                        onClick = {
+                            // Professional Nav Handling: Avoid stack buildup
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            scope.launch { drawerState.setValue(DrawerValue.Closed) }
+                        },
+                        leadingContent = {
+                            screen.icon?.let {
+                                Icon(
+                                    it,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        /*colors = NavigationDrawerItemDefaults.colors(
                             selectedContainerColor = Color.White.copy(alpha = 0.15f),
                             focusedContainerColor = Color.White.copy(alpha = 0.25f),
                             selectedContentColor = Color.White,
                             focusedContentColor = Color.White
-                        )
+                        )*/
                     ) {
-                        Text(item.label)
+                        screen.label?.let { Text(it) }
                     }
                 }
 
@@ -180,57 +197,43 @@ fun ProModalDrawerScreen() {
 
                 // --- SETTINGS ---
                 NavigationDrawerItem(
-                    selected = false,
-                    onClick = { },
-                    leadingContent = { Icon(Icons.Default.Settings, null) }
+                    selected = currentRoute == Screen.Settings.route,
+                    onClick = {
+                        navController.navigate(Screen.Settings.route)
+                        scope.launch { drawerState.setValue(DrawerValue.Closed) }
+                    },
+                    leadingContent = { Screen.Settings.icon?.let { Icon(it, null) } }
                 ) {
-                    Text("Settings")
+                    Screen.Settings.label?.let { Text(it) }
                 }
             }
         },
     ) {
-        // --- MAIN CONTENT (The Grid) ---
-        MainContentGrid()
-    }
-}
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-fun MainContentGrid() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF121212))
-            .padding(start = 100.dp, top = 40.dp, end = 20.dp)
-    ) {
-        Text("Movies for You", style = MaterialTheme.typography.headlineMedium, color = Color.White)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 50.dp)
+        // --- NAVIGATION HOST (The Content) ---
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                // When drawer is closed, rail is 80dp. We add that as padding.
+                .padding(start = 80.dp)
         ) {
-            items(12) { index ->
-                Card(
-                    onClick = { },
-                    modifier = Modifier.aspectRatio(16f/9f),
-                    colors = CardDefaults.colors(
-                        containerColor = Color(0xFF1E1E1E),
-                        focusedContainerColor = Color(0xFF333333)
-                    )
-                ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Item $index", color = Color.White)
-                    }
-                }
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.route,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable(Screen.Search.route) { SearchScreen() }
+                composable(Screen.Home.route) { HomeScreen() }
+                composable(Screen.Movies.route) { WishlistScreen() }
+                composable(Screen.Shows.route) { ShowsScreen() }
+                composable(Screen.Library.route) { LibraryScreen() }
+                composable(Screen.Settings.route) { SettingsScreen() }
             }
         }
     }
 }
+
 @Composable
-fun HomeScreen() {
+fun ManScreen() {
     ScreenUI("Home Screen")
 }
 
@@ -258,11 +261,26 @@ fun LibraryScreen() {
 fun SettingsScreen() {
     ScreenUI("Settings")
 }
-data class NavigationItem(val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+
+data class NavigationItem(
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector
+)
 
 @Composable
 fun ScreenUI(title: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(title, color = Color.White)
+        VideoCard(
+            video = VideoEntity(
+                title = "The Great Adventure",
+                description = "A journey into the unknown depths of the forest.",
+                videoUrl = "https://example.com/video1.mp4",
+                card = "https://example.com/card1.jpg",
+                background = "https://example.com/bg1.jpg",
+                studio = "Pro Studios",
+                category = "Movies"
+            ),
+            {},
+        )
     }
 }

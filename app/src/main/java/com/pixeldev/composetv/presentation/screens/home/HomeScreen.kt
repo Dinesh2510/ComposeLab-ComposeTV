@@ -191,7 +191,7 @@ fun ModernImmersiveListScreen(
                 VideoMetadataBanner(
                     video = it,
                     modifier = Modifier.padding(
-                        start = 58.dp,
+                        start = 40.dp,
                         top = 74.dp,
                         end = 58.dp,
                         bottom = 74.dp
@@ -216,7 +216,7 @@ fun ModernImmersiveListScreen(
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 16.sp,
                             modifier = Modifier.padding(
-                                start = 58.dp,
+                                start = 40.dp ,
                                 bottom = 14.dp,
                                 top = if (rowIndex == 0) 0.dp else 24.dp
                             )
@@ -225,7 +225,7 @@ fun ModernImmersiveListScreen(
 
                     item {
                         LazyRow(
-                            contentPadding = PaddingValues(start = 58.dp, end = 58.dp),
+                            contentPadding = PaddingValues(start = 40.dp , end = 58.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             itemsIndexed(videoList) { index, video ->
