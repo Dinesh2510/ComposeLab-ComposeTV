@@ -130,7 +130,15 @@ fun ProModalDrawerScreen() {
         0.4f to Color.Black.copy(alpha = 0.5f),
         1.0f to Color.Transparent
     )
-
+    val drawerGradient = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFF0F0F0F),               // Fully opaque on the left
+            Color(0xFF0F0F0F).copy(alpha = 0.8f), // Slight fade
+            Color.Transparent          // Fully transparent on the right
+        ),
+        startX = 0f,
+        endX = Float.POSITIVE_INFINITY // Spreads the gradient across the width
+    )
     ModalNavigationDrawer(
         drawerState = drawerState,
         scrimBrush = scrimBrush,
@@ -139,7 +147,7 @@ fun ProModalDrawerScreen() {
                 Modifier
                     .fillMaxHeight()
                     .width(if (drawerValue == DrawerValue.Open) 280.dp else 80.dp)
-                    .background(Color(0xFF0F0F0F))
+                    .background(drawerGradient)
                     .padding(12.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -153,7 +161,7 @@ fun ProModalDrawerScreen() {
                     }
                 ) {
                     Column {
-                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelMedium)
                     }
                 }
 
