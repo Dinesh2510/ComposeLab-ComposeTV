@@ -127,7 +127,7 @@ fun ModernImmersiveListScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0D12))
+            .background(Color(0xFF020B16))
     ) {
 
         // 🔥 BACKGROUND

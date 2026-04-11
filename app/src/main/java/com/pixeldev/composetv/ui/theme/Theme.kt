@@ -18,7 +18,7 @@ fun ComposeTvDemoTheme(
         colorScheme = darkColorScheme(
             background = PrimeBackground,
             surface = PrimeSurface,
-            primary = PrimeAccent,
+            primary = PrimeSurfaceElevated,
             onPrimary = Color.White
         ),
         typography = Typography,
