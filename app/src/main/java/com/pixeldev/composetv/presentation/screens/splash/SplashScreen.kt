@@ -39,6 +39,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
 import com.pixeldev.composetv.ui.theme.PrimeBackground
 import com.pixeldev.composetv.ui.theme.PrimeSurface
@@ -111,8 +112,10 @@ fun SplashScreen(navController: NavController) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        PrimeBackground,
-                        PrimeSurface
+                        Color(0xFF00050D), // deep black
+                        Color(0xFF020617), // darker (less gray)
+                        Color(0xFF050B18), // smooth blend
+                        Color(0xFF0A1624)  // subtle lift (NOT too bright)
                     )
                 )
             ),
@@ -128,23 +131,54 @@ fun SplashScreen(navController: NavController) {
             }
         ) {
 
-            // 🔥 LOGO (your banner)
-            Image(
-                painter = painterResource(id = R.drawable.app_banner),
-                contentDescription = "App Logo",
+            // 🔥 Glow behind logo (IMPORTANT FIX)
+            Box(
                 modifier = Modifier
-                    .width(200.dp)
-                    .height(120.dp)
-            )
+                    .size(220.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                Color(0x332196F3), // blue glow
+                                Color(0x332A0F6F), // purple glow
+                                Color.Transparent
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.app_banner),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .width(260.dp)
+                        .height(140.dp)
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // 🔥 APP NAME
+            // 🔥 Gradient TEXT (matches logo)
             Text(
                 text = stringResource(R.string.app_name),
-                color = Color.White,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                style = TextStyle(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFFB388FF), // purple
+                            Color(0xFF2196F3)  // blue
+                        )
+                    )
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.app_name_subtitle),
+                color = Color(0xFFB0BEC5), // soft gray (not white)
+                fontSize = 14.sp,
                 letterSpacing = 1.sp
             )
 

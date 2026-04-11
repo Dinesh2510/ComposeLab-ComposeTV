@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ComposeTv Demo</string>
+    <string name="app_name">ComposeTv Lab</string>
+    <string name="app_name_subtitle">Build • Test • Explore</string>
 </resources>
