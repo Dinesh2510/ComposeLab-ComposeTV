@@ -125,17 +125,18 @@ fun ProModalDrawerScreen() {
         Screen.Library
     )
 
-    val scrimBrush = Brush.horizontalGradient(
-        0.0f to Color(0xFF00050D).copy(alpha = 0.95f), // deep app bg
-        0.4f to Color(0xFF00050D).copy(alpha = 0.7f),
-        0.7f to Color(0xFF020817).copy(alpha = 0.4f),
+    val drawerGradient = Brush.horizontalGradient(
+        0.0f to Color(0xFF020B16),              // deep blue-black (NOT pure black)
+        0.25f to Color(0xFF020B16),             // keep left solid
+        0.55f to Color(0xFF020B16).copy(alpha = 0.85f),
+        0.75f to Color(0xFF020B16).copy(alpha = 0.6f),
+        0.9f to Color(0xFF020B16).copy(alpha = 0.3f),
         1.0f to Color.Transparent
     )
-
-    val drawerGradient = Brush.horizontalGradient(
-        0.0f to Color(0xFF00050D),                // main app bg
-        0.5f to Color(0xFF020817),                // slight blue depth
-        0.8f to Color(0xFF0A1624).copy(alpha = 0.8f), // matches surface tone
+    val scrimBrush = Brush.horizontalGradient(
+        0.0f to Color(0xFF020B16).copy(alpha = 0.95f),
+        0.4f to Color(0xFF020B16).copy(alpha = 0.6f),
+        0.7f to Color(0xFF020B16).copy(alpha = 0.3f),
         1.0f to Color.Transparent
     )
     ModalNavigationDrawer(
