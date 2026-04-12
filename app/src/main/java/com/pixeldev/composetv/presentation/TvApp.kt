@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pixeldev.composetv.presentation.navigation.Screen
 import com.pixeldev.composetv.presentation.screens.dashboard.DashboardScreen
-import com.pixeldev.composetv.presentation.screens.home.HomeScreen
+import com.pixeldev.composetv.presentation.screens.details.HomeDetailsScreen
 import com.pixeldev.composetv.presentation.screens.onboard.OnboardingScreen
 import com.pixeldev.composetv.presentation.screens.splash.SplashScreen
 
@@ -27,7 +27,11 @@ fun TvApp() {
         }
 
         composable(Screen.Dashboard.route) {
-            DashboardScreen()
+            DashboardScreen(navController)
+        }
+        // ✅ ADD THIS
+        composable(Screen.HomeDetails.route) {
+            HomeDetailsScreen()
         }
     }
 }

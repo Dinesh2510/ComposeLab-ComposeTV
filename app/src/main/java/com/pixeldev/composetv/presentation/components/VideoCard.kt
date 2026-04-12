@@ -163,6 +163,7 @@ fun VideoCardStdFocus(
 fun VideoCard(
     video: VideoEntity,
     onFocused: (VideoEntity) -> Unit,
+    onClickCard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -173,7 +174,7 @@ fun VideoCard(
 
         // 🎬 CARD
         Card(
-            onClick = { /* TODO: Play video */ },
+            onClick = {onClickCard() },
             colors = CardDefaults.colors(
                 containerColor = Color.DarkGray,
                 focusedContainerColor = Color.DarkGray

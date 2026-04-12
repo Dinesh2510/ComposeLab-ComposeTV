@@ -17,6 +17,9 @@ sealed class Screen(val route: String, val label: String? = null, val icon: Imag
     // Main Wrapper
     object Dashboard : Screen("dashboard")
 
+    object HomeDetails : Screen("homedetails")
+
+
     // Drawer Items
     object Search : Screen("search", "Search", Icons.Default.Search)
     object Home : Screen("home", "Home", Icons.Default.Home)
