@@ -1,6 +1,7 @@
 package com.pixeldev.composetv.presentation.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
@@ -23,7 +24,7 @@ sealed class Screen(val route: String, val label: String? = null, val icon: Imag
     // Drawer Items
     object Search : Screen("search", "Search", Icons.Default.Search)
     object Home : Screen("home", "Home", Icons.Default.Home)
-    object Movies : Screen("movies", "Movies", Icons.Default.Movie)
+    object Favorite : Screen("wishlist", "WishList", Icons.Default.Bookmark)
     object Shows : Screen("shows", "Shows", Icons.Default.Tv)
     object Library : Screen("library", "Library", Icons.Default.VideoLibrary)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)

@@ -66,7 +66,7 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
     val menuItems = listOf(
         Screen.Search,
         Screen.Home,
-        Screen.Movies,
+        Screen.Favorite,
         Screen.Shows,
         Screen.Library
     )
@@ -177,7 +177,7 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
             ) {
                 composable(Screen.Search.route) { SearchScreen() }
                 composable(Screen.Home.route) { HomeScreen(parentNavController1) }
-                composable(Screen.Movies.route) { WishlistScreen() }
+                composable(Screen.Favorite.route) { WishlistScreen() }
                 composable(Screen.Shows.route) { ShowsScreen() }
                 composable(Screen.Library.route) { LibraryScreen() }
                 composable(Screen.Settings.route) { SettingsScreen() }
