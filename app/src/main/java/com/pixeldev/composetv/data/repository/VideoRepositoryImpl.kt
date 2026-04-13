@@ -22,7 +22,7 @@ class VideoRepositoryImpl @Inject constructor(
             val existing = dao.getAllVideos().first()
 
             val mapped = response.toEntityList(existing)
-            dao.clearAll()
+           // dao.clearAll()
             dao.insertAll(mapped)
             emit(ResultState.Success(Unit))
         } catch (e: Exception) {

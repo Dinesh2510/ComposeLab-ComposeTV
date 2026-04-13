@@ -63,44 +63,39 @@ import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
+import com.pixeldev.composetv.data.local.entity.VideoEntity
 
 @Composable
 fun WishlistScreen( viewModel: VideoViewModel = hiltViewModel()) {
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        ModernImmersiveGridScreen()
+        ModernImmersiveGridScreen(viewModel)
     }
-    /*val wishlist by viewModel.wishlist.collectAsState()
+    val wishlist by viewModel.wishlist.collectAsState()
 
     LazyColumn {
         items(wishlist.size) {
             Text(wishlist[it].title)
         }
-    }*/
+    }
 }
 
 
 
-// 1. Data Model
-data class Movie(
-    val id: String,
-    val title: String,
-    val description: String,
-    val rating: String,
-    val genre: String,
-    val year: String,
-    val duration: String,
-    val imageUrl: String
-)
+
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun ModernImmersiveGridScreen() {
+fun ModernImmersiveGridScreen(
+    viewModel: VideoViewModel // pass your VM here
+) {
+    val wishlist by viewModel.wishlist.collectAsState()
 
-    val dummyMovies = generateOnlineDummyMovies()
+    // Safely handle empty wishlist
+    val initialMovie = wishlist.firstOrNull()
 
-    var currentFocusedMovie by remember { mutableStateOf(dummyMovies.first()) }
+    var currentFocusedMovie by remember { mutableStateOf<VideoEntity?>(initialMovie) }
 
     val firstItemFocusRequester = remember { FocusRequester() }
     var hasRequestedInitialFocus by remember { mutableStateOf(false) }
@@ -117,12 +112,14 @@ fun ModernImmersiveGridScreen() {
             animationSpec = tween(600),
             label = "bg_fade"
         ) { movie ->
-            AsyncImage(
-                model = movie.imageUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            movie?.let {
+                AsyncImage(
+                    model = it.card,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
 
         // Gradient overlays
@@ -149,18 +146,19 @@ fun ModernImmersiveGridScreen() {
                 )
         )
 
-        // --- FOREGROUND ---
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Banner
-            MovieMetadataBanner(
-                movie = currentFocusedMovie,
-                modifier = Modifier.padding(58.dp, 64.dp, 58.dp, 32.dp)
-            )
+            currentFocusedMovie?.let { movie ->
+                MovieMetadataBanner(
+                    movie = movie,
+                    modifier = Modifier.padding(58.dp, 64.dp, 58.dp, 32.dp)
+                )
+            }
 
-            // GRID SECTION
+            // GRID
             LazyVerticalGrid(
-                columns = GridCells.Fixed(4), // 👈 change to 3 or 4
+                columns = GridCells.Fixed(4),
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(
                     start = 58.dp,
@@ -172,14 +170,14 @@ fun ModernImmersiveGridScreen() {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                itemsIndexed(dummyMovies) { index, movie ->
+                itemsIndexed(wishlist) { index, movie ->
 
                     val focusModifier =
                         if (index == 0) {
                             Modifier
                                 .focusRequester(firstItemFocusRequester)
                                 .onGloballyPositioned {
-                                    if (!hasRequestedInitialFocus) {
+                                    if (!hasRequestedInitialFocus && wishlist.isNotEmpty()) {
                                         firstItemFocusRequester.requestFocus()
                                         hasRequestedInitialFocus = true
                                     }
@@ -199,7 +197,7 @@ fun ModernImmersiveGridScreen() {
 // 3. The Movie Card Composable
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun MovieCard(movie: Movie, onFocused: (Movie) -> Unit, modifier: Modifier = Modifier) {
+fun MovieCard(movie: VideoEntity, onFocused: (VideoEntity) -> Unit, modifier: Modifier = Modifier) {
     Card(
         onClick = { /* Handle Click Events */ },
         colors = CardDefaults.colors(
@@ -224,7 +222,7 @@ fun MovieCard(movie: Movie, onFocused: (Movie) -> Unit, modifier: Modifier = Mod
             }
     ) {
         AsyncImage(
-            model = movie.imageUrl,
+            model = movie.card,
             contentDescription = movie.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -234,7 +232,7 @@ fun MovieCard(movie: Movie, onFocused: (Movie) -> Unit, modifier: Modifier = Mod
 
 // 4. The Movie Banner Composable
 @Composable
-fun MovieMetadataBanner(movie: Movie, modifier: Modifier = Modifier) {
+fun MovieMetadataBanner(movie: VideoEntity, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(0.5f)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -245,13 +243,13 @@ fun MovieMetadataBanner(movie: Movie, modifier: Modifier = Modifier) {
                     .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
-                Text(text = movie.rating, color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+                Text(text = movie.category, color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
             }
-            Text(
+           /* Text(
                 text = "${movie.genre}  •  ${movie.year}  •  ${movie.duration}",
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 14.sp
-            )
+            )*/
         }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
@@ -272,21 +270,5 @@ fun MovieMetadataBanner(movie: Movie, modifier: Modifier = Modifier) {
             overflow = TextOverflow.Ellipsis
         )
     }
-}
-
-// 5. Dummy Data Generator
-fun generateOnlineDummyMovies(): List<Movie> {
-    return listOf(
-        Movie("1", "Power Sisters", "A dynamic duo of superhero siblings join forces to save their city from a sinister villain.", "U/A 13+", "Action", "2022", "2h 15m",
-            "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop"),
-        Movie("2", "Neon Cyberpunk", "A detective hunts down a rogue AI in the rain-soaked streets of a futuristic metropolis.", "A", "Sci-Fi", "2024", "1h 50m",
-            "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2025&auto=format&fit=crop"),
-        Movie("3", "The Martian Horizon", "A crew struggles to survive on the red planet after a catastrophic habitat failure.", "U", "Sci-Fi/Drama", "2023", "2h 30m",
-            "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1974&auto=format&fit=crop"),
-        Movie("4", "Deep Ocean", "Researchers discover something ancient and terrifying sleeping at the bottom of the Mariana Trench.", "U/A 16+", "Thriller", "2021", "1h 45m",
-            "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=1964&auto=format&fit=crop"),
-        Movie("5", "Mountain Edge", "A legendary climber attempts the impossible: summiting the deadliest peak in winter.", "U", "Documentary", "2022", "1h 25m",
-            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop")
-    )
 }
 
