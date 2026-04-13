@@ -202,7 +202,8 @@ fun ModernImmersiveListScreen(
                                 VideoCard(
                                     video = video,
                                     onFocused = { currentFocusedVideo = it },
-                                    onClickCard = { navController.navigate(Screen.HomeDetails.route) },
+                                    onClickCard = {
+                                        navController.navigate(Screen.HomeDetails.route+ "/${video.title}") },
                                     modifier = focusModifier
                                 )
                             }

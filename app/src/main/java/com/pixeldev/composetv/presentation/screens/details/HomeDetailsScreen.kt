@@ -22,6 +22,7 @@ package com.pixeldev.composetv.presentation.screens.details
  * limitations under the License.
  */
 // Compose Core
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -53,6 +54,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.ui.Alignment
 
 // Image (Coil)
 import coil.compose.AsyncImage
@@ -63,12 +65,32 @@ import androidx.compose.ui.layout.ContentScale
 
 // DP Units
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
+import com.pixeldev.composetv.data.local.entity.VideoEntity
+import com.pixeldev.composetv.presentation.components.HotstarLoader
 import kotlinx.coroutines.launch
 
-
 @Composable
-fun HomeDetailsScreen() {
+fun HomeDetailsScreen(
+    videoTitle: String,
+    onBackPressed: () -> Unit,
+    viewModel: HomeDetailsViewModel = hiltViewModel()
+) {
+    val videoDataItem by viewModel.videoDetails.collectAsStateWithLifecycle()
+    val relatedItems by viewModel.relatedVideos.collectAsStateWithLifecycle()
+
+    Log.d("Details", "title: $videoTitle")
+    Log.d("Details", "video: $videoDataItem")
+    Log.d("Details", "related: $relatedItems")
+
+    // ✅ Single source of truth for UI state
+    val videoData = videoDataItem ?: return LoadingScreen()
+    /*    val activity = LocalContext.current as ComponentActivity
+        val sharedViewModel: SharedViewModel = hiltViewModel(activity)
+        val videoData by sharedViewModel.selectedVideo.collectAsState()
+        Log.e("TAG_VM", "HomeDetailsScreen: $videoData")*/
 
     Box(
         modifier = Modifier
@@ -78,7 +100,7 @@ fun HomeDetailsScreen() {
 
         // 🔥 BACKGROUND IMAGE
         AsyncImage(
-            model = "https://storage.googleapis.com/androiddevelopers/samples_assets/android-tv/Sample%20videos/Zeitgeist/Zeitgeist%202011_%20Year%20In%20Review/bg.jpg",
+            model = videoData!!.card,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -109,42 +131,56 @@ fun HomeDetailsScreen() {
                 .padding(start = 60.dp, top = 80.dp),
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
-            item { MovieHeaderSection() }
+            item { MovieHeaderSection(videoData) }
 
             item { ActionButtons() }
 
-            item { MovieDescription() }
+            item { MovieDescription(videoData) }
 
-            item { RelatedSection() } // 👈 important
+            item { RelatedSection(relatedItems) } // 👈 important
         }
     }
 }
+
 @Composable
-fun MovieHeaderSection() {
-    Column {
-
-        Text(
-            text = "SPIDER-MAN",
-            color = Color.Red,
-            fontSize = 42.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Text(
-            text = "No Way Home",
-            color = Color.White,
-            fontSize = 26.sp
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = "#7 in action movies",
-            color = Color.Green,
-            fontSize = 14.sp
-        )
+private fun LoadingScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        HotstarLoader()
     }
 }
+
+@Composable
+fun MovieHeaderSection(videoData: VideoEntity?) {
+    videoData?.let { video ->
+        Column {
+
+            Text(
+                text = videoData.title,
+                color = Color.White,
+                fontSize = 42.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = videoData.category,
+                color = Color.White,
+                fontSize = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "#7 in action movies",
+                color = Color.Green,
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
 @Composable
 fun ActionButtons() {
 
@@ -161,6 +197,7 @@ fun ActionButtons() {
         )
     }
 }
+
 @Composable
 fun TvButton(
     text: String,
@@ -207,11 +244,11 @@ fun TvButton(
 }
 
 @Composable
-fun MovieDescription() {
+fun MovieDescription(videoData: VideoEntity?) {
     Column {
 
         Text(
-            text = "Spider-Man faces several unwanted guests when a spell by Doctor Strange backfires.",
+            text = videoData?.description ?: "",
             color = Color.White,
             fontSize = 16.sp,
             maxLines = 3
@@ -234,14 +271,16 @@ fun MovieDescription() {
         )
     }
 }
+
 @Composable
-fun RelatedSection() {
+fun RelatedSection(relatedItems: List<VideoEntity>) {
 
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
+            .padding(top = 22.dp)
             .bringIntoViewRequester(bringIntoViewRequester)
             .onFocusChanged { state ->
                 if (state.isFocused) {
@@ -253,25 +292,28 @@ fun RelatedSection() {
     ) {
 
         Text(
-            text = "Related",
+            text = "Related Videos",
             color = Color.White,
             fontSize = 20.sp
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(10) {
-                RelatedItem()
+            // please parse rhe list relatedItems into items key couint contenttype
+
+            items(count = relatedItems.size) { index->
+                RelatedItem(relatedItems[index])
             }
         }
     }
 }
 
+
 @Composable
-fun RelatedItem() {
+fun RelatedItem(entity: VideoEntity) {
 
     var isFocused by remember { mutableStateOf(false) }
 
@@ -279,14 +321,14 @@ fun RelatedItem() {
 
     Box(
         modifier = Modifier
-            .size(width = 180.dp, height = 260.dp)
+            .size(width = 320.dp, height = 180.dp)
             .scale(scale)
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
     ) {
 
         AsyncImage(
-            model = "https://image.tmdb.org/t/p/w500/sample.jpg",
+            model = entity.card,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier

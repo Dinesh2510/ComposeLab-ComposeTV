@@ -19,6 +19,9 @@ interface VideoDao {
     @Query("SELECT * FROM videos WHERE category = :category")
     fun getVideosByCategory(category: String): Flow<List<VideoEntity>>
 
+    @Query("SELECT * FROM videos WHERE title = :title LIMIT 1")
+    fun getVideoByTitle(title: String): Flow<VideoEntity?>
+
     @Query("SELECT * FROM videos WHERE isWishlist = 1")
     fun getWishlist(): Flow<List<VideoEntity>>
 

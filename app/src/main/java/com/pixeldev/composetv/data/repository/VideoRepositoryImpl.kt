@@ -8,7 +8,9 @@ import com.pixeldev.composetv.data.remote.ApiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-class VideoRepositoryImpl(
+import javax.inject.Inject
+
+class VideoRepositoryImpl @Inject constructor(
     private val api: ApiService,
     private val dao: VideoDao
 ) : VideoRepository {
@@ -17,16 +19,12 @@ class VideoRepositoryImpl(
         emit(ResultState.Loading)
         try {
             val response = api.getVideos()
-
             val existing = dao.getAllVideos().first()
 
             val mapped = response.toEntityList(existing)
-
             dao.clearAll()
             dao.insertAll(mapped)
-
             emit(ResultState.Success(Unit))
-
         } catch (e: Exception) {
             emit(ResultState.Error(e.message ?: "Something went wrong"))
         }
@@ -34,6 +32,14 @@ class VideoRepositoryImpl(
 
     override fun getVideos(): Flow<List<VideoEntity>> {
         return dao.getAllVideos()
+    }
+
+    override fun getVideosByCategory(category: String): Flow<List<VideoEntity>> {
+        return dao.getVideosByCategory(category)
+    }
+
+    override fun getVideoByTitle(title: String): Flow<VideoEntity?> {
+        return dao.getVideoByTitle(title)
     }
 
     override fun getWishlist(): Flow<List<VideoEntity>> {
