@@ -54,6 +54,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.Alignment
 
 // Image (Coil)
@@ -67,6 +70,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.Icon
+import androidx.tv.material3.IconButton
 import androidx.tv.material3.Text
 import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.presentation.components.HotstarLoader
@@ -133,7 +138,11 @@ fun HomeDetailsScreen(
         ) {
             item { MovieHeaderSection(videoData) }
 
-            item { ActionButtons() }
+            item { ActionButtons(
+                isWishlisted = videoData.isWishlist,
+                onWishlistToggle = { viewModel.toggleWishlist() }
+            ) }
+
 
             item { MovieDescription(videoData) }
 
@@ -182,7 +191,10 @@ fun MovieHeaderSection(videoData: VideoEntity?) {
 }
 
 @Composable
-fun ActionButtons() {
+fun ActionButtons(
+    isWishlisted: Boolean,
+    onWishlistToggle: () -> Unit
+) {
 
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
 
@@ -195,6 +207,14 @@ fun ActionButtons() {
             text = "More ways to watch",
             isPrimary = false
         )
+        // Example — adapt to your existing layout
+        IconButton(onClick = onWishlistToggle) {
+            Icon(
+                imageVector = if (isWishlisted) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = if (isWishlisted) "Remove from Wishlist" else "Add to Wishlist",
+                tint = if (isWishlisted) Color.Red else Color.Gray
+            )
+        }
     }
 }
 

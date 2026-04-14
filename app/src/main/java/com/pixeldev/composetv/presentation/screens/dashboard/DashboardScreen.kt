@@ -44,6 +44,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pixeldev.composetv.R
 import com.pixeldev.composetv.data.local.entity.VideoEntity
+import com.pixeldev.composetv.presentation.screens.webview.WebViewScreen
 import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
 
 @Composable
@@ -177,8 +178,10 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
             ) {
                 composable(Screen.Search.route) { SearchScreen() }
                 composable(Screen.Home.route) { HomeScreen(parentNavController1) }
-                composable(Screen.Favorite.route) { WishlistScreen() }
-                composable(Screen.Shows.route) { ShowsScreen() }
+                composable(Screen.Favorite.route) { WishlistScreen(){
+                    navController.navigate(Screen.Home.route)
+                } }
+                composable(Screen.Shows.route) { WebViewScreen(){} }
                 composable(Screen.Library.route) { LibraryScreen() }
                 composable(Screen.Settings.route) { SettingsScreen() }
             }

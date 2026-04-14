@@ -66,18 +66,17 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.pixeldev.composetv.data.local.entity.VideoEntity
 
 @Composable
-fun WishlistScreen( viewModel: VideoViewModel = hiltViewModel()) {
+fun WishlistScreen(
+    viewModel: VideoViewModel = hiltViewModel(),
+    onGoHome: () -> Unit // <-- pass navigation lambda from NavHost
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        ModernImmersiveGridScreen(viewModel)
-    }
-    val wishlist by viewModel.wishlist.collectAsState()
-
-    LazyColumn {
-        items(wishlist.size) {
-            Text(wishlist[it].title)
-        }
+        ModernImmersiveGridScreen(
+            viewModel = viewModel,
+            onGoHome = onGoHome
+        )
     }
 }
 
@@ -88,9 +87,16 @@ fun WishlistScreen( viewModel: VideoViewModel = hiltViewModel()) {
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ModernImmersiveGridScreen(
-    viewModel: VideoViewModel // pass your VM here
+    viewModel: VideoViewModel,
+    onGoHome: () -> Unit
 ) {
     val wishlist by viewModel.wishlist.collectAsState()
+
+    // ✅ EMPTY STATE
+    if (wishlist.isEmpty()) {
+        EmptyWishlistScreen(onGoHome = onGoHome)
+        return
+    }
 
     // Safely handle empty wishlist
     val initialMovie = wishlist.firstOrNull()
@@ -269,6 +275,53 @@ fun MovieMetadataBanner(movie: VideoEntity, modifier: Modifier = Modifier) {
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+fun EmptyWishlistScreen(
+    onGoHome: () -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D0D12)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Your wishlist is empty",
+                color = Color.White,
+                fontSize = 28.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Find movies you love and add them here ❤️",
+                color = Color.LightGray,
+                fontSize = 18.sp
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = onGoHome,
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+            ) {
+                Text("Browse Videos")
+            }
+        }
     }
 }
 
