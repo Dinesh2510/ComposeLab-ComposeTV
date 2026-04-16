@@ -68,8 +68,8 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
         Screen.Search,
         Screen.Home,
         Screen.Favorite,
-        Screen.Shows,
-        Screen.Library
+        Screen.PrivacyPolicy,
+        Screen.Terms
     )
 
     val drawerGradient = Brush.horizontalGradient(
@@ -181,8 +181,8 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
                 composable(Screen.Favorite.route) { WishlistScreen(){
                     navController.navigate(Screen.Home.route)
                 } }
-                composable(Screen.Shows.route) { WebViewScreen(){} }
-                composable(Screen.Library.route) { LibraryScreen() }
+                composable(Screen.PrivacyPolicy.route) { WebViewScreen(url = "https://www.android.com/", "Privacy Policy"){} }
+                composable(Screen.Terms.route) { WebViewScreen(url = "https://www.apple.com/in/", "Terms & Condition"){} }
                 composable(Screen.Settings.route) { SettingsScreen() }
             }
         }
