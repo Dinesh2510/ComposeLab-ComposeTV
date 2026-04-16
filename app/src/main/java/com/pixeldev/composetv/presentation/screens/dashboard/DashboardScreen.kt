@@ -44,6 +44,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pixeldev.composetv.R
 import com.pixeldev.composetv.data.local.entity.VideoEntity
+import com.pixeldev.composetv.presentation.screens.search.SearchScreen
 import com.pixeldev.composetv.presentation.screens.webview.WebViewScreen
 import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
 
@@ -176,7 +177,7 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
                 startDestination = Screen.Home.route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                composable(Screen.Search.route) { SearchScreen() }
+                composable(Screen.Search.route) { SearchScreen(){} }
                 composable(Screen.Home.route) { HomeScreen(parentNavController1) }
                 composable(Screen.Favorite.route) { WishlistScreen(){
                     navController.navigate(Screen.Home.route)
@@ -190,39 +191,10 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
 }
 
 @Composable
-fun ManScreen() {
-    ScreenUI("Home Screen")
-}
-
-@Composable
-fun SearchScreen() {
-    ScreenUI("Search")
-}
-
-@Composable
-fun MoviesScreen() {
-    ScreenUI("Movies")
-}
-
-@Composable
-fun ShowsScreen() {
-    ScreenUI("Shows")
-}
-
-@Composable
-fun LibraryScreen() {
-    ScreenUI("Library")
-}
-
-@Composable
 fun SettingsScreen() {
     ScreenUI("Settings")
 }
 
-data class NavigationItem(
-    val label: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
-)
 
 @Composable
 fun ScreenUI(title: String) {
@@ -237,8 +209,8 @@ fun ScreenUI(title: String) {
                 studio = "Pro Studios",
                 category = "Movies"
             ),
-            {},
-            {}
+            onFocused = {},
+            onClickCard = {}
         )
     }
 }

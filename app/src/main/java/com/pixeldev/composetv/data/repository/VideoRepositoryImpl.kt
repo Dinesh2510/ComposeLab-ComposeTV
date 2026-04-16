@@ -49,4 +49,15 @@ class VideoRepositoryImpl @Inject constructor(
     override suspend fun toggleWishlist(title: String, isWish: Boolean) {
         dao.updateWishlist(title, isWish)
     }
+
+    override fun searchVideos(query: String): Flow<List<VideoEntity>> {
+        return dao.searchVideos(query)
+    }
+
+    override fun getSearchSuggestions(query: String): Flow<List<String>> {
+        return dao.getSearchSuggestions(query)
+    }
+    override fun getRandomTitles(): Flow<List<String>> {
+        return dao.getRandomTitles()
+    }
 }

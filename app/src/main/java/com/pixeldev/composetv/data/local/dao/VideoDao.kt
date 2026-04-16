@@ -30,4 +30,23 @@ interface VideoDao {
 
     @Query("DELETE FROM videos")
     suspend fun clearAll()
+
+    @Query("SELECT * FROM videos WHERE title LIKE '%' || :query || '%'")
+    fun searchVideos(query: String): Flow<List<VideoEntity>>
+
+    @Query("""
+    SELECT DISTINCT title 
+    FROM videos 
+    WHERE title LIKE :query || '%' 
+    LIMIT 10
+""")
+    fun getSearchSuggestions(query: String): Flow<List<String>>
+
+    @Query("""
+    SELECT title 
+    FROM videos 
+    ORDER BY RANDOM() 
+    LIMIT 5
+""")
+    fun getRandomTitles(): Flow<List<String>>
 }

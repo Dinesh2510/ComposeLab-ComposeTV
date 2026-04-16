@@ -17,4 +17,10 @@ interface VideoRepository {
     fun getWishlist(): Flow<List<VideoEntity>>
 
     suspend fun toggleWishlist(title: String, isWish: Boolean)
+
+    fun searchVideos(query: String): Flow<List<VideoEntity>>
+
+    fun getSearchSuggestions(query: String): Flow<List<String>>
+
+    fun getRandomTitles(): Flow<List<String>>
 }
