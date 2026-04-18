@@ -155,10 +155,17 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
                 suggestions.forEach { suggestion ->
 
                     var isFocused by remember { mutableStateOf(false) }
-
+                    val scale by animateFloatAsState(
+                        targetValue = if (isFocused) 1.01f else 1f,
+                        label = "scaleAnim"
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
                             .onFocusChanged { isFocused = it.isFocused }
                             .focusable()
                             .border(
@@ -220,9 +227,16 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
                         val title = randomTitles[index]
 
                         var isFocused by remember { mutableStateOf(false) }
-
+                        val scale by animateFloatAsState(
+                            targetValue = if (isFocused) 1.05f else 1f,
+                            label = "chipScale"
+                        )
                         Box(
                             modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                }
                                 .onFocusChanged { isFocused = it.isFocused }
                                 .focusable()
                                 .border(
