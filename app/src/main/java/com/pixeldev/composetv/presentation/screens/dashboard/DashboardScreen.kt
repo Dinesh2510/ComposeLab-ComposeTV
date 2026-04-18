@@ -183,7 +183,7 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
             ) {
                 composable(Screen.Search.route) { SearchScreen(parentNavController1){} }
                 composable(Screen.Home.route) { HomeScreen(parentNavController1) }
-                composable(Screen.Favorite.route) { WishlistScreen(){
+                composable(Screen.Favorite.route) { WishlistScreen(parentNavController1){
                     navController.navigate(Screen.Home.route)
                 } }
                 composable(Screen.PrivacyPolicy.route) { WebViewScreen(url = "https://www.android.com/", "Privacy Policy"){} }

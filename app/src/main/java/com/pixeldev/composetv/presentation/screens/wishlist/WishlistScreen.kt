@@ -58,15 +58,19 @@ import androidx.compose.foundation.lazy.itemsIndexed
 
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.navigation.NavController
 
 import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.pixeldev.composetv.data.local.entity.VideoEntity
+import com.pixeldev.composetv.domain.model.Video
+import com.pixeldev.composetv.presentation.navigation.Screen
 
 @Composable
 fun WishlistScreen(
+    navController: NavController,
     viewModel: VideoViewModel = hiltViewModel(),
     onGoHome: () -> Unit // <-- pass navigation lambda from NavHost
 ) {
@@ -75,7 +79,8 @@ fun WishlistScreen(
     ) {
         ModernImmersiveGridScreen(
             viewModel = viewModel,
-            onGoHome = onGoHome
+            onGoHome = onGoHome,
+          navController =  navController
         )
     }
 }
@@ -88,8 +93,9 @@ fun WishlistScreen(
 @Composable
 fun ModernImmersiveGridScreen(
     viewModel: VideoViewModel,
-    onGoHome: () -> Unit
-) {
+    onGoHome: () -> Unit,
+    navController: NavController
+    ) {
     val wishlist by viewModel.wishlist.collectAsState()
 
     // ✅ EMPTY STATE
@@ -176,7 +182,10 @@ fun ModernImmersiveGridScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                itemsIndexed(wishlist) { index, movie ->
+                itemsIndexed(
+                    items = wishlist,
+                    key = { _, movie -> movie.title } // 👈 MUST be unique id
+                ) { index, movie ->
 
                     val focusModifier =
                         if (index == 0) {
@@ -193,7 +202,8 @@ fun ModernImmersiveGridScreen(
                     MovieCard(
                         movie = movie,
                         onFocused = { currentFocusedMovie = it },
-                        modifier = focusModifier
+                        modifier = focusModifier,
+                        onClickCard = { navController.navigate(Screen.HomeDetails.route+ "/${movie.title}")}
                     )
                 }
             }
@@ -203,9 +213,9 @@ fun ModernImmersiveGridScreen(
 // 3. The Movie Card Composable
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun MovieCard(movie: VideoEntity, onFocused: (VideoEntity) -> Unit, modifier: Modifier = Modifier) {
+fun MovieCard(movie: VideoEntity, onFocused: (VideoEntity) -> Unit, modifier: Modifier = Modifier, onClickCard:(VideoEntity)-> Unit) {
     Card(
-        onClick = { /* Handle Click Events */ },
+        onClick = { onClickCard(movie) },
         colors = CardDefaults.colors(
             containerColor = Color.DarkGray,
             focusedContainerColor = Color.DarkGray
