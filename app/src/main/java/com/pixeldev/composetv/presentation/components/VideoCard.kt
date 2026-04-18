@@ -55,7 +55,6 @@ import com.pixeldev.composetv.presentation.screens.home.VideoViewModel
 @Composable
 fun VideoCardStd(
     video: VideoEntity,
-    viewModel: VideoViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -94,7 +93,6 @@ fun VideoCardStd(
 @Composable
 fun VideoCardStdFocus(
     video: VideoEntity,
-    viewModel: VideoViewModel,
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }

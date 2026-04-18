@@ -75,6 +75,8 @@ import androidx.tv.material3.IconButton
 import androidx.tv.material3.Text
 import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.presentation.components.HotstarLoader
+import com.pixeldev.composetv.presentation.components.VideoCardStd
+import com.pixeldev.composetv.presentation.components.VideoCardStdFocus
 import kotlinx.coroutines.launch
 
 @Composable
@@ -314,54 +316,20 @@ fun RelatedSection(relatedItems: List<VideoEntity>) {
         Text(
             text = "Related Videos",
             color = Color.White,
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            modifier = Modifier.padding(start = 12.dp)
         )
 
-        Spacer(modifier = Modifier.height(22.dp))
-
         LazyRow(
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // please parse rhe list relatedItems into items key couint contenttype
-
+            // TODO: Onclick Remaining
             items(count = relatedItems.size) { index->
-                RelatedItem(relatedItems[index])
+                VideoCardStdFocus(relatedItems[index])
             }
         }
     }
 }
 
-
-@Composable
-fun RelatedItem(entity: VideoEntity) {
-
-    var isFocused by remember { mutableStateOf(false) }
-
-    val scale by animateFloatAsState(if (isFocused) 1.1f else 1f)
-
-    Box(
-        modifier = Modifier
-            .size(width = 320.dp, height = 180.dp)
-            .scale(scale)
-            .onFocusChanged { isFocused = it.isFocused }
-            .focusable()
-    ) {
-
-        AsyncImage(
-            model = entity.card,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(10.dp))
-        )
-
-        if (isFocused) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .border(2.dp, Color.White, RoundedCornerShape(10.dp))
-            )
-        }
-    }
-}
