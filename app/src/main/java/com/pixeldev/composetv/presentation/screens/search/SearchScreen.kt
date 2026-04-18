@@ -1,5 +1,6 @@
 package com.pixeldev.composetv.presentation.screens.search
 
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 
@@ -37,6 +40,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -49,32 +54,39 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
+import androidx.navigation.NavController
 
 import androidx.tv.material3.Icon
 import com.pixeldev.composetv.presentation.components.TopCornerGlowBackgroundCustom
 import com.pixeldev.composetv.presentation.components.VideoCard
+import com.pixeldev.composetv.presentation.navigation.Screen
 
 @Composable
 fun SearchScreen(
+    navController: NavController,
     viewModel: SearchViewModel = hiltViewModel(),
     onItemClick: (VideoEntity) -> Unit
 ) {
     TopCornerGlowBackgroundCustom(){
 
-        TvSearchBar(viewModel)
+        TvSearchBar(viewModel,navController)
     }
 }
-
 @Composable
-fun TvSearchBar(viewModel: SearchViewModel) {
+fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
+
     val results by viewModel.results.collectAsState()
     val hasSearched by viewModel.hasSearched.collectAsState()
+    val suggestions by viewModel.suggestions.collectAsState()
+    val randomTitles by viewModel.randomTitles.collectAsState()
     val query = viewModel.query
 
     val searchFocusRequester = remember { FocusRequester() }
     val listFocusRequester = remember { FocusRequester() }
 
     var isSearchFocused by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,13 +97,14 @@ fun TvSearchBar(viewModel: SearchViewModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(56.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Color(0xFF2A2A2A))
                 .border(
-                    width = if (isSearchFocused) 3.dp else 1.dp,
+                    width = if (isSearchFocused) 2.dp else 1.dp,
                     color = if (isSearchFocused) Color.White else Color.Gray,
-                    shape = RoundedCornerShape(30.dp)
+                    shape = RoundedCornerShape(50)
                 )
-                .background(Color.DarkGray, RoundedCornerShape(30.dp))
                 .onFocusChanged { isSearchFocused = it.isFocused }
                 .focusRequester(searchFocusRequester)
                 .focusable()
@@ -102,60 +115,51 @@ fun TvSearchBar(viewModel: SearchViewModel) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                modifier = Modifier
-                    .clickable { viewModel.onSearch() }
+                tint = Color.LightGray,
+                modifier = Modifier.clickable { viewModel.onSearch() }
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            BasicTextField(
-                value = query,
-                onValueChange = { viewModel.onQueryChange(it) },
-                singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(
-                    color = Color.White,
-                    fontSize = 18.sp
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .onPreviewKeyEvent {
-                        if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
-                            viewModel.onSearch()
-                            listFocusRequester.requestFocus()
-                            true
-                        } else false
-                    }
-            )
+            Box(modifier = Modifier.weight(1f)) {
+
+                BasicTextField(
+                    value = query,
+                    onValueChange = { viewModel.onQueryChange(it) },
+                    singleLine = true,
+                    textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onPreviewKeyEvent {
+                            if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
+                                viewModel.onSearch()
+                                listFocusRequester.requestFocus()
+                                true
+                            } else false
+                        }
+                )
+
+                if (query.isEmpty()) {
+                    Text("Search", color = Color.Gray)
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(30.dp))
-        val suggestions by viewModel.suggestions.collectAsState()
 
-// 🔽 SUGGESTIONS when user enter words
-        if (query.isNotEmpty() && suggestions.isNotEmpty()) {
+        // 🔽 Suggestions
+        if (query.isNotEmpty() && suggestions.isNotEmpty() && !hasSearched) {
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp) // 👈 controlled spacing (no weird gaps)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+
                 suggestions.forEach { suggestion ->
 
-                    val focusRequester = remember { FocusRequester() }
                     var isFocused by remember { mutableStateOf(false) }
-
-                    val scale by animateFloatAsState(
-                        targetValue = if (isFocused) 1.01f else 1f,
-                        label = "scaleAnim"
-                    )
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
-                            }
                             .onFocusChanged { isFocused = it.isFocused }
-                            .focusRequester(focusRequester)
                             .focusable()
                             .border(
                                 width = if (isFocused) 2.dp else 0.dp,
@@ -169,42 +173,43 @@ fun TvSearchBar(viewModel: SearchViewModel) {
                                     Color.Transparent,
                                 shape = RoundedCornerShape(10.dp)
                             )
+                            .onPreviewKeyEvent {
+                                if ((it.key == Key.Enter || it.key == Key.DirectionCenter)
+                                    && it.type == KeyEventType.KeyDown
+                                ) {
+                                    viewModel.onQueryChange(suggestion)
+                                    viewModel.onSearch()
+                                    listFocusRequester.requestFocus()
+                                    true
+                                } else false
+                            }
                             .clickable {
                                 viewModel.onQueryChange(suggestion)
                                 viewModel.onSearch()
+                                listFocusRequester.requestFocus()
                             }
-                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                            .padding(12.dp)
                     ) {
-                        Text(
-                            text = suggestion,
-                            color = Color.White
-                        )
+                        Text(suggestion, color = Color.White)
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
         }
-        Spacer(modifier = Modifier.height(12.dp))
 
-        // Trending Search
-        val randomTitles by viewModel.randomTitles.collectAsState()
-
+        // 🔽 Trending
         if (query.isEmpty()) {
 
             Column {
 
-                Text(
-                    text = "Try searching",
-                    color = Color.Gray,
-                    fontSize = 18.sp
-                )
+                Text("Try searching", color = Color.Gray)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp)
                 ) {
 
                     items(
@@ -213,19 +218,11 @@ fun TvSearchBar(viewModel: SearchViewModel) {
                     ) { index ->
 
                         val title = randomTitles[index]
-                        var isFocused by remember { mutableStateOf(false) }
 
-                        val scale by animateFloatAsState(
-                            targetValue = if (isFocused) 1.05f else 1f,
-                            label = "chipScale"
-                        )
+                        var isFocused by remember { mutableStateOf(false) }
 
                         Box(
                             modifier = Modifier
-                                .graphicsLayer {
-                                    scaleX = scale
-                                    scaleY = scale
-                                }
                                 .onFocusChanged { isFocused = it.isFocused }
                                 .focusable()
                                 .border(
@@ -233,71 +230,66 @@ fun TvSearchBar(viewModel: SearchViewModel) {
                                     color = if (isFocused) Color.White else Color.Gray,
                                     shape = RoundedCornerShape(50)
                                 )
-                                .background(
-                                    color = if (isFocused)
-                                        Color.White.copy(alpha = 0.06f)
-                                    else
-                                        Color.Transparent,
-                                    shape = RoundedCornerShape(50)
-                                )
+                                .onPreviewKeyEvent {
+                                    if ((it.key == Key.Enter || it.key == Key.DirectionCenter)
+                                        && it.type == KeyEventType.KeyDown
+                                    ) {
+                                        viewModel.onQueryChange(title)
+                                        viewModel.onSearch()
+                                        listFocusRequester.requestFocus()
+                                        true
+                                    } else false
+                                }
                                 .clickable {
                                     viewModel.onQueryChange(title)
                                     viewModel.onSearch()
+                                    listFocusRequester.requestFocus()
                                 }
                                 .padding(horizontal = 20.dp, vertical = 12.dp)
                         ) {
-                            Text(
-                                text = title,
-                                color = Color.White
-                            )
+                            Text(title, color = Color.White)
                         }
                     }
                 }
             }
         }
+
         Spacer(modifier = Modifier.height(30.dp))
 
         // 📺 CONTENT AREA
         when {
 
-            // 💤 Idle state
             !hasSearched -> {
                 CenterMessage("Start typing and press OK to search")
             }
 
-            // 📭 Empty state
             hasSearched && results.isEmpty() -> {
                 CenterMessage("No results found")
             }
 
-            // ✅ Results
             else -> {
-                LazyColumn(
+
+                // 🔥 FIXED GRID (TV STYLE)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier
                         .fillMaxSize()
                         .focusRequester(listFocusRequester)
                 ) {
-                    items(results.size ) { video ->
 
-                        val itemFocusRequester = remember { FocusRequester() }
-                        var isFocused by remember { mutableStateOf(false) }
+                    items(results.size) { index ->
 
                         Box(
                             modifier = Modifier
-                                .padding(vertical = 10.dp)
-                                .onFocusChanged { isFocused = it.isFocused }
-                                .focusRequester(itemFocusRequester)
-                                .focusable()
-                                .border(
-                                    width = if (isFocused) 3.dp else 0.dp,
-                                    color = Color.White,
-                                    shape = RoundedCornerShape(12.dp)
-                                )
+                                .padding(10.dp) // 👈 gives room for scale (NO UI shift)
                         ) {
                             VideoCard(
-                                video = results[video],
-                                onFocused = { },
-                                onClickCard = { /*onItemClick(results[video])*/ }
+                                video = results[index],
+                                onFocused = {},
+                                onClickCard = {
+                                    navController.navigate(Screen.HomeDetails.route+ "/${results[index].title}") },
                             )
                         }
                     }
@@ -306,7 +298,6 @@ fun TvSearchBar(viewModel: SearchViewModel) {
         }
     }
 
-    // 🎯 Auto focus search
     LaunchedEffect(Unit) {
         searchFocusRequester.requestFocus()
     }
@@ -322,31 +313,6 @@ fun CenterMessage(text: String) {
             text = text,
             color = Color.Gray,
             fontSize = 20.sp
-        )
-    }
-}
-fun Modifier.tvGlow(
-    isFocused: Boolean,
-    shape: Shape = RoundedCornerShape(50)
-): Modifier {
-    return if (isFocused) {
-        this
-            .shadow(
-                elevation = 8.dp,
-                shape = shape,
-                ambientColor = Color.White,
-                spotColor = Color.White
-            )
-            .border(
-                width = 2.dp,
-                color = Color.White,
-                shape = shape
-            )
-    } else {
-        this.border(
-            width = 1.5.dp,
-            color = Color.Gray,
-            shape = shape
         )
     }
 }

@@ -181,7 +181,7 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
                 startDestination = Screen.Home.route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                composable(Screen.Search.route) { SearchScreen(){} }
+                composable(Screen.Search.route) { SearchScreen(parentNavController1){} }
                 composable(Screen.Home.route) { HomeScreen(parentNavController1) }
                 composable(Screen.Favorite.route) { WishlistScreen(){
                     navController.navigate(Screen.Home.route)
