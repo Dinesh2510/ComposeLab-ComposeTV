@@ -44,7 +44,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pixeldev.composetv.R
 import com.pixeldev.composetv.data.local.entity.VideoEntity
+import com.pixeldev.composetv.presentation.components.TvAppBackground
+import com.pixeldev.composetv.presentation.components.TvAppBackgroundNew
+import com.pixeldev.composetv.presentation.components.TvAppBackgroundNewtt
 import com.pixeldev.composetv.presentation.screens.search.SearchScreen
+import com.pixeldev.composetv.presentation.screens.search.TvSearchBar
 import com.pixeldev.composetv.presentation.screens.webview.WebViewScreen
 import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
 
@@ -199,6 +203,7 @@ fun SettingsScreen() {
 @Composable
 fun ScreenUI(title: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        TvAppBackgroundNewtt( glowColor = Color(0xFFE53935) )
         VideoCard(
             video = VideoEntity(
                 title = "The Great Adventure",
