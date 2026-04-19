@@ -54,10 +54,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
 
 // Image (Coil)
 import coil.compose.AsyncImage
@@ -70,8 +74,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.Button
+import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.IconButton
+import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.presentation.components.HotstarLoader
@@ -136,7 +143,7 @@ fun HomeDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 60.dp, top = 80.dp),
-            verticalArrangement = Arrangement.spacedBy(30.dp)
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             item { MovieHeaderSection(videoData) }
 
@@ -144,11 +151,8 @@ fun HomeDetailsScreen(
                 isWishlisted = videoData.isWishlist,
                 onWishlistToggle = { viewModel.toggleWishlist() }
             ) }
-
-
             item { MovieDescription(videoData) }
-
-            item { RelatedSection(relatedItems) } // 👈 important
+            item { RelatedSection(relatedItems) }
         }
     }
 }
@@ -197,71 +201,69 @@ fun ActionButtons(
     isWishlisted: Boolean,
     onWishlistToggle: () -> Unit
 ) {
-
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-
-        TvButton(
-            text = "Watch again",
-            isPrimary = false
+    Row {
+        TvActionButton(text = "Play")
+        TvActionButton(text = "Buy HD ₹320.00")
+        TvActionButton(
+            text = if (isWishlisted) "Save" else "Unsave",
+            icon =if (isWishlisted) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+            isPrimary = false,
+            onClick = {onWishlistToggle()}
+            /*tint = if (isWishlisted) Color.Red else Color.Gray*/
         )
-
-        TvButton(
-            text = "More ways to watch",
-            isPrimary = false
-        )
-        // Example — adapt to your existing layout
-        IconButton(onClick = onWishlistToggle) {
-            Icon(
-                imageVector = if (isWishlisted) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = if (isWishlisted) "Remove from Wishlist" else "Add to Wishlist",
-                tint = if (isWishlisted) Color.Red else Color.Gray
-            )
-        }
     }
 }
 
 @Composable
-fun TvButton(
+fun TvActionButton(
     text: String,
-    isPrimary: Boolean
+    icon: ImageVector? = null,
+    isPrimary: Boolean = false, // Primary is the white "Watchlist" style
+    onClick: () -> Unit = {}
 ) {
-    var isFocused by remember { mutableStateOf(false) }
+    // 1. Define colors based on the image
+    // Dark buttons are semi-transparent grey. Watchlist is off-white.
+    val containerColor = if (isPrimary) Color(0xFFE8EAED) else Color(0xFFFFFFFFF).copy(alpha = 0.2f)
+    val contentColor = if (isPrimary) Color.Black else Color.White
 
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f
-    )
-
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            isFocused -> Color.White               // 🔥 FOCUS = ALWAYS WHITE
-            isPrimary -> Color.White.copy(alpha = 0.85f)
-            else -> Color.DarkGray
-        }
-    )
-
-    val textColor by animateColorAsState(
-        targetValue = if (isFocused || isPrimary) Color.Black else Color.White
-    )
-
-    Box(
-        modifier = Modifier
-            .scale(scale)
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .border(
-                width = if (isFocused) 4.dp else 0.dp,
-                color = Color.White,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .onFocusChanged { isFocused = it.isFocused }
-            .focusable()
-            .padding(horizontal = 24.dp, vertical = 12.dp)
+    // 2. Button handles focus states automatically via ButtonDefaults
+    Button(
+        onClick = onClick,
+        shape = ButtonDefaults.shape(shape = CircleShape), // Capsule shape
+        scale = ButtonDefaults.scale(focusedScale = 1.1f), // Smooth scale on focus
+        colors = ButtonDefaults.colors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            focusedContainerColor = Color.White,
+            focusedContentColor = Color.Black
+        ),contentPadding = PaddingValues(
+            start = if (icon != null) 16.dp else 24.dp,
+            top = 10.dp, // Adjusted slightly to match the image height
+            end = 24.dp,
+            bottom = 10.dp
+        ),
+        modifier = Modifier.padding(8.dp)
     ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontSize = 16.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 16.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                )
+            )
+        }
     }
 }
 
