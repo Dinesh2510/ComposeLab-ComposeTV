@@ -66,6 +66,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 // Image (Coil)
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 
 // TV Lazy Components
 
@@ -275,10 +276,11 @@ fun MovieDescription(videoData: VideoEntity?) {
             text = videoData?.description ?: "",
             color = Color.White,
             fontSize = 16.sp,
-            maxLines = 3
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = "Action • Adventure • IMDb 8.1 • 2021 • 2h 22m",
