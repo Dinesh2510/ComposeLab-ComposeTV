@@ -10,6 +10,7 @@ import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.data.repository.VideoRepository
 import com.pixeldev.composetv.domain.model.Category
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +44,7 @@ class VideoViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+    val wishlistFlow: Flow<List<VideoEntity>> = repository.getWishlist()
 
     // 🚀 Init Load
     init {

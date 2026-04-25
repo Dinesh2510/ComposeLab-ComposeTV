@@ -159,7 +159,7 @@ fun HomeDetailsScreen(
 }
 
 @Composable
-private fun LoadingScreen() {
+ fun LoadingScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

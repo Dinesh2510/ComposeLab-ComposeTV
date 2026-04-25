@@ -58,15 +58,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 
 import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
+import com.pixeldev.composetv.core.ResultState
 import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.domain.model.Video
 import com.pixeldev.composetv.presentation.navigation.Screen
+import com.pixeldev.composetv.presentation.screens.details.LoadingScreen
 
 @Composable
 fun WishlistScreen(
@@ -96,14 +99,21 @@ fun ModernImmersiveGridScreen(
     onGoHome: () -> Unit,
     navController: NavController
     ) {
-    val wishlist by viewModel.wishlist.collectAsState()
+   // val wishlist by viewModel.wishlist.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
+    val wishlist by viewModel.wishlistFlow
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+// Don't flash empty screen while data is loading
+    if (syncState is ResultState.Loading && wishlist.isEmpty()) {
+        // Show shimmer/loading indicator instead
+        LoadingScreen()
+        return
+    }
 
-    // ✅ EMPTY STATE
     if (wishlist.isEmpty()) {
         EmptyWishlistScreen(onGoHome = onGoHome)
         return
     }
-
     // Safely handle empty wishlist
     val initialMovie = wishlist.firstOrNull()
 

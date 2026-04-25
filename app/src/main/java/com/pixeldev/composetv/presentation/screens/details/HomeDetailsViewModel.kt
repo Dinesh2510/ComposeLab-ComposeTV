@@ -18,14 +18,15 @@ class HomeDetailsViewModel @Inject constructor(
 
     private val videoTitle: String? = savedStateHandle["vidID"]
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    // HomeDetailsViewModel — THE actual fix
+
     val videoDetails: StateFlow<VideoEntity?> = flow {
         videoTitle?.let { title ->
             emitAll(repository.getVideoByTitle(title))
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.Eagerly, // ← fix here, not in VideoViewModel
         initialValue = null
     )
 
