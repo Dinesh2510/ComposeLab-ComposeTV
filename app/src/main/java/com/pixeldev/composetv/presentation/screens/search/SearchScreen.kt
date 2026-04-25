@@ -68,8 +68,17 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onItemClick: (VideoEntity) -> Unit
 ) {
-    TopCornerGlowBackgroundCustom(){
+    // 🧹 CLEAR QUERY ON START & EXIT
+    DisposableEffect(Unit) {
+        // This runs when the screen enters the composition
+        // (Optional: viewModel.onQueryChange("") if you want it fresh every time)
 
+        onDispose {
+            // This runs when the user leaves the screen (Destroys)
+            viewModel.onQueryChange("")
+        }
+    }
+    TopCornerGlowBackgroundCustom(){
         TvSearchBar(viewModel,navController)
     }
 }
@@ -241,7 +250,7 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
                                 .focusable()
                                 .border(
                                     width = 2.dp,
-                                    color = if (isFocused) Color.White else Color.Gray,
+                                    color = if (isFocused) Color.White else Color.DarkGray,
                                     shape = RoundedCornerShape(50)
                                 )
                                 .onPreviewKeyEvent {
