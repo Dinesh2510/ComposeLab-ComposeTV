@@ -58,9 +58,10 @@ fun OnboardingScreen(navController: NavController) {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF0F2027),
-                        Color(0xFF203A43),
-                        Color(0xFF2C5364)
+                        Color(0xFF00050D), // deep black
+                        Color(0xFF020617), // darker (less gray)
+                        Color(0xFF050B18), // smooth blend
+                        Color(0xFF0A1624)  // subtle lift (NOT too bright)
                     )
                 )
             ),

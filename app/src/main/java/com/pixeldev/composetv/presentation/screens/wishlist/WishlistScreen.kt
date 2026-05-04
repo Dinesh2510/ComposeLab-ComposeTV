@@ -68,6 +68,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.pixeldev.composetv.core.ResultState
 import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.domain.model.Video
+import com.pixeldev.composetv.presentation.components.TvAppBackgroundNewtt
 import com.pixeldev.composetv.presentation.navigation.Screen
 import com.pixeldev.composetv.presentation.screens.details.LoadingScreen
 
@@ -310,10 +311,10 @@ fun EmptyWishlistScreen(
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D0D12)),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+            TvAppBackgroundNewtt( glowColor = Color(0xFFFFEA00))
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

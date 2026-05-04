@@ -33,12 +33,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -54,6 +56,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
 
@@ -68,17 +71,8 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onItemClick: (VideoEntity) -> Unit
 ) {
-    // 🧹 CLEAR QUERY ON START & EXIT
-    DisposableEffect(Unit) {
-        // This runs when the screen enters the composition
-        // (Optional: viewModel.onQueryChange("") if you want it fresh every time)
-
-        onDispose {
-            // This runs when the user leaves the screen (Destroys)
-            viewModel.onQueryChange("")
-        }
-    }
     TopCornerGlowBackgroundCustom(){
+
         TvSearchBar(viewModel,navController)
     }
 }
@@ -95,66 +89,141 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
     val listFocusRequester = remember { FocusRequester() }
 
     var isSearchFocused by remember { mutableStateOf(false) }
+    var isFocusedBtn by remember { mutableStateOf(false) }
+
+    //val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp)
     ) {
-
+        //ExactSearchUI()
         // 🔍 SEARCH BOX
-        Row(
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color(0xFF2A2A2A))
-                .border(
-                    width = if (isSearchFocused) 2.dp else 1.dp,
-                    color = if (isSearchFocused) Color.White else Color.Gray,
-                    shape = RoundedCornerShape(50)
-                )
-                .onFocusChanged { isSearchFocused = it.isFocused }
-                .focusRequester(searchFocusRequester)
-                .focusable()
+                .height(80.dp)
+                /*.background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF2B0000), // deep red glow left
+                            Color(0xFF120000),
+                            Color(0xFF000000)
+                        )
+                    )
+                )*/
                 .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            contentAlignment = Alignment.CenterStart
         ) {
 
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
-                tint = Color.LightGray,
-                modifier = Modifier.clickable { viewModel.onSearch() }
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
 
-            Spacer(modifier = Modifier.width(12.dp))
 
-            Box(modifier = Modifier.weight(1f)) {
-
-                BasicTextField(
-                    value = query,
-                    onValueChange = { viewModel.onQueryChange(it) },
-                    singleLine = true,
-                    textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+                // 🔍 Search Field
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .onPreviewKeyEvent {
-                            if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
-                                viewModel.onSearch()
-                                listFocusRequester.requestFocus()
-                                true
-                            } else false
+                        .weight(1f)
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0x33FFFFFF), // subtle glass effect
+                                    Color(0x11FFFFFF)
+                                )
+                            )
+                        )
+                        .border(
+                            width = if (isSearchFocused) 2.dp else 0.dp,
+                            color = Color.White,
+                            shape = RoundedCornerShape(28.dp)
+                        )
+                        .focusRequester(searchFocusRequester)
+                        .onFocusChanged {
+                            isSearchFocused = it.isFocused
+                            if (it.isFocused) keyboardController?.show()
                         }
-                )
+                        .focusable()
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
 
-                if (query.isEmpty()) {
-                    Text("Search", color = Color.Gray)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        BasicTextField(
+                            value = query,
+                            onValueChange = { viewModel.onQueryChange(it) },
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                color = Color.White,
+                                fontSize = 16.sp
+                            ),
+                            modifier = Modifier.fillMaxWidth().onPreviewKeyEvent {
+                                if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
+                                    viewModel.onSearch()
+                                    listFocusRequester.requestFocus()
+                                    true
+                                } else false
+                            }
+                        ) { innerTextField ->
+
+                            if (query.isEmpty()) {
+                                Text(
+                                    "Search for an app",
+                                    color = Color.Gray
+                                )
+                            }
+
+                            innerTextField()
+                        }
+                    }
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // 🎤 Mic Circle (LEFT SIDE - FIXED)
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        //.background(Color(0xFF1E1E1E))
+                        .border(
+                            width = if (isFocusedBtn) 2.dp else 0.dp,
+                            color = Color.White,
+                            shape = RoundedCornerShape(28.dp)
+                        )
+                        //.focusRequester(searchFocusRequester)
+                        .onFocusChanged {
+                            isFocusedBtn = it.isFocused
+                            if (it.isFocused) keyboardController?.show()
+                        }
+                        .focusable()
+                    /* .border(2.dp, Color.White.copy(alpha = 0.7f), CircleShape)*/,
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+
             }
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
+        // 🔍 SEARCH BOX
+
+        Spacer(modifier = Modifier.height(22.dp))
 
         // 🔽 Suggestions
         if (query.isNotEmpty() && suggestions.isNotEmpty() && !hasSearched) {
@@ -249,9 +318,9 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
                                 .onFocusChanged { isFocused = it.isFocused }
                                 .focusable()
                                 .border(
-                                    width = 2.dp,
-                                    color = if (isFocused) Color.White else Color.DarkGray,
-                                    shape = RoundedCornerShape(50)
+                                    width = if (isFocused) 2.dp else 0.dp,
+                                    color = if (isFocused) Color.White else Color.Gray,
+                                    shape = RoundedCornerShape(28)
                                 )
                                 .onPreviewKeyEvent {
                                     if ((it.key == Key.Enter || it.key == Key.DirectionCenter)
@@ -270,7 +339,7 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
                                 }
                                 .padding(horizontal = 20.dp, vertical = 12.dp)
                         ) {
-                            Text(title, color = Color.White)
+                            Text(title, color = Color.White, fontSize = 12.sp)
                         }
                     }
                 }
@@ -325,7 +394,209 @@ fun TvSearchBar(viewModel: SearchViewModel, navController: NavController) {
         searchFocusRequester.requestFocus()
     }
 }
+@Composable
+fun TvSearchBar(
+    modifier: Modifier = Modifier
+) {
+    var query by remember { mutableStateOf("") }
+    var isFocused by remember { mutableStateOf(false) }
 
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .clip(RoundedCornerShape(30.dp))
+            .background(Color(0xFF2A2A2A))
+            .border(
+                width = if (isFocused) 2.dp else 0.dp,
+                color = if (isFocused) Color.White else Color.Transparent,
+                shape = RoundedCornerShape(30.dp)
+            )
+            .focusRequester(focusRequester)
+            .onFocusChanged {
+                isFocused = it.isFocused
+                if (it.isFocused) {
+                    keyboardController?.show()
+                }
+            }
+            .focusable()
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            // 🔍 Search icon (always left)
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            BasicTextField(
+                value = query,
+                onValueChange = { query = it },
+                singleLine = true,
+                textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
+                modifier = Modifier
+                    .weight(1f)
+            ) { innerTextField ->
+
+                if (query.isEmpty()) {
+                    Text(
+                        "Search for an app",
+                        color = Color.Gray
+                    )
+                }
+
+                innerTextField()
+            }
+
+            // 🎤 Mic moves RIGHT only when focused
+            if (isFocused) {
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                )
+            }
+        }
+    }
+}
+@Composable
+fun ExactSearchUI() {
+    var query by remember { mutableStateOf("") }
+    var isFocused by remember { mutableStateOf(false) }
+    var isFocusedBtn by remember { mutableStateOf(false) }
+
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            /*.background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFF2B0000), // deep red glow left
+                        Color(0xFF120000),
+                        Color(0xFF000000)
+                    )
+                )
+            )*/
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+
+
+            // 🔍 Search Field
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(0x33FFFFFF), // subtle glass effect
+                                Color(0x11FFFFFF)
+                            )
+                        )
+                    )
+                    .border(
+                        width = if (isFocused) 2.dp else 0.dp,
+                        color = Color.White,
+                        shape = RoundedCornerShape(28.dp)
+                    )
+                    .focusRequester(focusRequester)
+                    .onFocusChanged {
+                        isFocused = it.isFocused
+                        if (it.isFocused) keyboardController?.show()
+                    }
+                    .focusable()
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = Color.Gray
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    BasicTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = Color.White,
+                            fontSize = 16.sp
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) { innerTextField ->
+
+                        if (query.isEmpty()) {
+                            Text(
+                                "Search for an app",
+                                color = Color.Gray
+                            )
+                        }
+
+                        innerTextField()
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // 🎤 Mic Circle (LEFT SIDE - FIXED)
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    //.background(Color(0xFF1E1E1E))
+                    .border(
+                        width = if (isFocusedBtn) 2.dp else 0.dp,
+                        color = Color.White,
+                        shape = RoundedCornerShape(28.dp)
+                    )
+                    .focusRequester(focusRequester)
+                    .onFocusChanged {
+                        isFocusedBtn = it.isFocused
+                        if (it.isFocused) keyboardController?.show()
+                    }
+                    .focusable()
+                /* .border(2.dp, Color.White.copy(alpha = 0.7f), CircleShape)*/,
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+
+        }
+    }
+}
 @Composable
 fun CenterMessage(text: String) {
     Box(

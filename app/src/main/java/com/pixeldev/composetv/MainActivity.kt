@@ -1,6 +1,7 @@
 package com.pixeldev.composetv
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -25,6 +26,17 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(PrimeBackground) // 🔥 IMPORTANT
                 )
+                val config = resources.configuration
+                val screenWidthDp = config.screenWidthDp
+                val screenHeightDp = config.screenHeightDp
+                Log.d("SCREEN", "Width: ${screenWidthDp}dp  Height: ${screenHeightDp}dp")
+                val dm = resources.displayMetrics
+
+                Log.d("SCREEN", "Width: ${config.screenWidthDp}dp Height: ${config.screenHeightDp}dp")
+                Log.d("SCREEN", "Pixels: ${dm.widthPixels} x ${dm.heightPixels}")
+                Log.d("SCREEN", "Density: ${dm.density}x  DPI: ${dm.densityDpi}")
+               // val cardWidth = resources.getDimension(R.dimen.card_width)
+               // Log.d("DIMEN", "card_width resolved to: $cardWidth px")
                 TvApp()
             }
             }

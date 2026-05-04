@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ComposeTv Demo"
+rootProject.name = "ComposeTv Lab"
 include(":app")
  
