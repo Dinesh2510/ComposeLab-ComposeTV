@@ -49,6 +49,7 @@ import com.pixeldev.composetv.presentation.components.TvAppBackgroundNew
 import com.pixeldev.composetv.presentation.components.TvAppBackgroundNewtt
 import com.pixeldev.composetv.presentation.screens.search.SearchScreen
 import com.pixeldev.composetv.presentation.screens.search.TvSearchBar
+import com.pixeldev.composetv.presentation.screens.settings.SettingsScreen
 import com.pixeldev.composetv.presentation.screens.webview.WebViewScreen
 import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
 
@@ -159,7 +160,14 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
                 NavigationDrawerItem(
                     selected = currentRoute == Screen.Settings.route,
                     onClick = {
-                        navController.navigate(Screen.Settings.route)
+                        // 🔥 FIX 2: Standardize navigation strategy for Settings
+                        navController.navigate(Screen.Settings.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                         scope.launch { drawerState.setValue(DrawerValue.Closed) }
                     },
                     leadingContent = { Screen.Settings.icon?.let { Icon(it, null) } }
@@ -194,10 +202,12 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
     }
 }
 
+/*
 @Composable
 fun SettingsScreen() {
     ScreenUI("Settings")
 }
+*/
 
 
 @Composable

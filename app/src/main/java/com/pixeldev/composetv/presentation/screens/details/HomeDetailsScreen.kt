@@ -75,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
@@ -85,12 +86,16 @@ import com.pixeldev.composetv.data.local.entity.VideoEntity
 import com.pixeldev.composetv.presentation.components.HotstarLoader
 import com.pixeldev.composetv.presentation.components.VideoCardStd
 import com.pixeldev.composetv.presentation.components.VideoCardStdFocus
+import com.pixeldev.composetv.presentation.navigation.Screen
+import com.pixeldev.composetv.presentation.screens.player.SharedPlaybackViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeDetailsScreen(
+    navController: NavController,
     videoTitle: String,
     onBackPressed: () -> Unit,
+    sharedPlaybackViewModel: SharedPlaybackViewModel, // 🔥 Added here
     viewModel: HomeDetailsViewModel = hiltViewModel()
 ) {
     val videoDataItem by viewModel.videoDetails.collectAsStateWithLifecycle()
@@ -149,8 +154,11 @@ fun HomeDetailsScreen(
             item { MovieHeaderSection(videoData) }
 
             item { ActionButtons(
+                videoData = videoData,
+                navController= navController,
                 isWishlisted = videoData.isWishlist,
-                onWishlistToggle = { viewModel.toggleWishlist() }
+                onWishlistToggle = { viewModel.toggleWishlist() },
+                sharedViewModel = sharedPlaybackViewModel
             ) }
             item { MovieDescription(videoData) }
             item { RelatedSection(relatedItems) }
@@ -199,11 +207,20 @@ fun MovieHeaderSection(videoData: VideoEntity?) {
 
 @Composable
 fun ActionButtons(
+    videoData: VideoEntity,
+    navController: NavController,
     isWishlisted: Boolean,
-    onWishlistToggle: () -> Unit
-) {
+    onWishlistToggle: () -> Unit,
+    sharedViewModel: SharedPlaybackViewModel,
+
+    ) {
     Row {
-        TvActionButton(text = "Play")
+        TvActionButton(text = "Play"){
+            // 1. Send the dynamic model to the shared state
+            sharedViewModel.setVideo(videoData)
+            // 🔥 Navigate safely to the player route when the button is clicked
+            navController.navigate(Screen.MediaPlayerScreen.route)
+        }
         TvActionButton(text = "Buy HD ₹320.00")
         TvActionButton(
             text = if (isWishlisted) "Save" else "Unsave",

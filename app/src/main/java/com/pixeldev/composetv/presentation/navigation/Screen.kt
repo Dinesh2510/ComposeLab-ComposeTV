@@ -21,6 +21,7 @@ sealed class Screen(val route: String, val label: String? = null, val icon: Imag
     object Dashboard : Screen("dashboard")
 
     object HomeDetails : Screen("homedetails")
+    object MediaPlayerScreen : Screen("media_player")
 
 
     // Drawer Items
