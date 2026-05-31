@@ -38,7 +38,15 @@ import com.pixeldev.composetv.presentation.components.VideoCard
 import com.pixeldev.composetv.presentation.navigation.Screen
 
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -52,6 +60,7 @@ import com.pixeldev.composetv.presentation.screens.search.TvSearchBar
 import com.pixeldev.composetv.presentation.screens.settings.SettingsScreen
 import com.pixeldev.composetv.presentation.screens.webview.WebViewScreen
 import com.pixeldev.composetv.presentation.screens.wishlist.WishlistScreen
+import kotlinx.coroutines.delay
 
 @Composable
 fun DashboardScreen(navController1: NavHostController) {
@@ -63,10 +72,9 @@ fun DashboardScreen(navController1: NavHostController) {
 @Composable
 fun ProModalDrawerScreen(parentNavController1: NavHostController) {
     val navController = rememberNavController()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    val drawerState   = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope         = rememberCoroutineScope()
 
-    // Track current route to highlight the correct drawer item
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -78,23 +86,66 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
         Screen.Terms
     )
 
+    // ── FIX: one FocusRequester per menu item + settings ──
+    val menuFocusRequesters = remember {
+        List(menuItems.size) { FocusRequester() }
+    }
+    val settingsFocusRequester = remember { FocusRequester() }
+
+    // ── FIX: when drawer opens → request focus on active item ──
+    LaunchedEffect(drawerState.currentValue) {
+        if (drawerState.currentValue == DrawerValue.Open) {
+            delay(200) // wait for drawer animation to finish
+            try {
+                when (currentRoute) {
+                    Screen.Settings.route -> settingsFocusRequester.requestFocus()
+                    else -> {
+                        val activeIndex = menuItems.indexOfFirst {
+                            it.route == currentRoute
+                        }
+                        if (activeIndex >= 0) {
+                            menuFocusRequesters[activeIndex].requestFocus()
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
+    // ── FIX: also re-focus when route changes while drawer is open ──
+    LaunchedEffect(currentRoute) {
+        if (drawerState.currentValue == DrawerValue.Open) {
+            delay(100)
+            try {
+                val activeIndex = menuItems.indexOfFirst { it.route == currentRoute }
+                if (activeIndex >= 0) {
+                    menuFocusRequesters[activeIndex].requestFocus()
+                } else if (currentRoute == Screen.Settings.route) {
+                    settingsFocusRequester.requestFocus()
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
     val drawerGradient = Brush.horizontalGradient(
-        0.0f to Color(0xFF020B16),              // deep blue-black (NOT pure black)
-        0.25f to Color(0xFF020B16),             // keep left solid
+        0.0f  to Color(0xFF020B16),
+        0.25f to Color(0xFF020B16),
         0.55f to Color(0xFF020B16).copy(alpha = 0.85f),
         0.75f to Color(0xFF020B16).copy(alpha = 0.6f),
-        0.9f to Color(0xFF020B16).copy(alpha = 0.3f),
-        1.0f to Color.Transparent
+        0.9f  to Color(0xFF020B16).copy(alpha = 0.3f),
+        1.0f  to Color.Transparent
     )
+
     val scrimBrush = Brush.horizontalGradient(
-        0.0f to Color(0xFF020B16).copy(alpha = 0.95f),
-        0.4f to Color(0xFF020B16).copy(alpha = 0.6f),
-        0.7f to Color(0xFF020B16).copy(alpha = 0.3f),
-        1.0f to Color.Transparent
+        0.0f  to Color(0xFF020B16).copy(alpha = 0.95f),
+        0.4f  to Color(0xFF020B16).copy(alpha = 0.6f),
+        0.7f  to Color(0xFF020B16).copy(alpha = 0.3f),
+        1.0f  to Color.Transparent
     )
+
     ModalNavigationDrawer(
         drawerState = drawerState,
-        scrimBrush = scrimBrush,
+        scrimBrush  = scrimBrush,
         drawerContent = { drawerValue ->
             Column(
                 Modifier
@@ -105,103 +156,173 @@ fun ProModalDrawerScreen(parentNavController1: NavHostController) {
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // --- PROFILE / HEADER ---
+
+                // ── HEADER ───────────────────────────────
                 NavigationDrawerItem(
                     selected = false,
-                    onClick = { /* Navigate to Profile */ },
+                    onClick  = {},
                     leadingContent = {
                         Icon(Icons.Default.AccountCircle, null, Modifier.size(32.dp))
-                    }
+                    },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        focusedContainerColor  = Color.White.copy(alpha = 0.1f),
+                        selectedContainerColor = Color.Transparent,
+                        focusedContentColor    = Color.White,
+                        selectedContentColor   = Color.White
+                    )
                 ) {
-                    Column {
-                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelMedium)
-                    }
+                    Text(
+                        stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White
+                    )
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // --- NAVIGATION ITEMS ---
-                menuItems.forEach { screen ->
+                // ── MENU ITEMS ───────────────────────────
+                menuItems.forEachIndexed { index, screen ->
+
+                    val isActive = currentRoute == screen.route
+                    var isFocused by remember { mutableStateOf(false) }
+
                     NavigationDrawerItem(
-                        selected = currentRoute == screen.route,
-                        onClick = {
-                            // Professional Nav Handling: Avoid stack buildup
+                        selected = isActive,
+                        onClick  = {
                             navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = false
                                 }
                                 launchSingleTop = true
-                                restoreState = true
+                                restoreState    = false
                             }
                             scope.launch { drawerState.setValue(DrawerValue.Closed) }
                         },
+                        // ── FIX: attach focus requester ──
+                        modifier = Modifier.focusRequester(
+                            menuFocusRequesters[index]
+                        ).onFocusChanged { isFocused = it.isFocused }
+                        ,
                         leadingContent = {
                             screen.icon?.let {
                                 Icon(
                                     it,
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    // ── FIX: orange tint when active ──
+                                    tint = when {
+                                        isFocused -> Color.Gray
+                                        isActive  -> Color(0xFFFF6B1A)
+                                        else      -> Color.Gray
+                                    }
                                 )
                             }
                         },
-                        /*colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Color.White.copy(alpha = 0.15f),
-                            focusedContainerColor = Color.White.copy(alpha = 0.25f),
-                            selectedContentColor = Color.White,
-                            focusedContentColor = Color.White
+                        // ── FIX: proper colors ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                       /* colors = NavigationDrawerItemDefaults.colors(
+                            containerColor         = Color.Transparent,
+                            focusedContainerColor  = Color(0xFFFF6B1A),
+                            selectedContainerColor = Color.White.copy(alpha = 0.12f),
+                            focusedSelectedContainerColor = Color(0xFFFF6B1A),
+                            contentColor           = Color.White.copy(alpha = 0.55f),
+                            focusedContentColor    = Color.White,
+                            selectedContentColor   = Color.White,
+                            focusedSelectedContentColor = Color.White
                         )*/
                     ) {
-                        screen.label?.let { Text(it) }
+                        screen.label?.let {
+                            Text(
+                                it,
+                                fontWeight = if (isActive) FontWeight.SemiBold
+                                else FontWeight.Normal
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // --- SETTINGS ---
+                // ── SETTINGS ─────────────────────────────
+                val isSettingsActive = currentRoute == Screen.Settings.route
+
                 NavigationDrawerItem(
-                    selected = currentRoute == Screen.Settings.route,
-                    onClick = {
-                        // 🔥 FIX 2: Standardize navigation strategy for Settings
+                    selected = isSettingsActive,
+                    onClick  = {
                         navController.navigate(Screen.Settings.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = false
                             }
                             launchSingleTop = true
-                            restoreState = true
+                            restoreState    = false
                         }
                         scope.launch { drawerState.setValue(DrawerValue.Closed) }
                     },
-                    leadingContent = { Screen.Settings.icon?.let { Icon(it, null) } }
+                    // ── FIX: attach settings focus requester ──
+                    modifier = Modifier.focusRequester(settingsFocusRequester),
+                    leadingContent = {
+                        Screen.Settings.icon?.let {
+                            Icon(
+                                it, null,
+                                tint = if (isSettingsActive) Color(0xFFFF6B1A)
+                                else Color.White.copy(alpha = 0.6f)
+                            )
+                        }
+                    },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        containerColor         = Color.Transparent,
+                        focusedContainerColor  = Color(0xFFFF6B1A),
+                        selectedContainerColor = Color.White.copy(alpha = 0.12f),
+                        focusedSelectedContainerColor = Color(0xFFFF6B1A),
+                        contentColor           = Color.White.copy(alpha = 0.55f),
+                        focusedContentColor    = Color.White,
+                        selectedContentColor   = Color.White,
+                        focusedSelectedContentColor = Color.White
+                    )
                 ) {
-                    Screen.Settings.label?.let { Text(it) }
+                    Screen.Settings.label?.let {
+                        Text(
+                            it,
+                            fontWeight = if (isSettingsActive) FontWeight.SemiBold
+                            else FontWeight.Normal
+                        )
+                    }
                 }
             }
-        },
+        }
     ) {
-        // --- NAVIGATION HOST (The Content) ---
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // When drawer is closed, rail is 80dp. We add that as padding.
                 .padding(start = 80.dp)
         ) {
             NavHost(
-                navController = navController,
+                navController    = navController,
                 startDestination = Screen.Home.route,
-                modifier = Modifier.fillMaxSize()
+                modifier         = Modifier.fillMaxSize()
             ) {
-                composable(Screen.Search.route) { SearchScreen(parentNavController1){} }
-                composable(Screen.Home.route) { HomeScreen(parentNavController1) }
-                composable(Screen.Favorite.route) { WishlistScreen(parentNavController1){
-                    navController.navigate(Screen.Home.route)
-                } }
-                composable(Screen.PrivacyPolicy.route) { WebViewScreen(url = "https://www.android.com/", "Privacy Policy"){} }
-                composable(Screen.Terms.route) { WebViewScreen(url = "https://www.apple.com/in/", "Terms & Condition"){} }
-                composable(Screen.Settings.route) { SettingsScreen() }
+                composable(Screen.Search.route) {
+                    SearchScreen(parentNavController1) {}
+                }
+                composable(Screen.Home.route) {
+                    HomeScreen(parentNavController1)
+                }
+                composable(Screen.Favorite.route) {
+                    WishlistScreen(parentNavController1) {
+                        navController.navigate(Screen.Home.route)
+                    }
+                }
+                composable(Screen.PrivacyPolicy.route) {
+                    WebViewScreen(url = "https://www.android.com/", "Privacy Policy") {}
+                }
+                composable(Screen.Terms.route) {
+                    WebViewScreen(url = "https://www.apple.com/in/", "Terms & Condition") {}
+                }
+                composable(Screen.Settings.route) {
+                    SettingsScreen()
+                }
             }
         }
     }
 }
-
 /*
 @Composable
 fun SettingsScreen() {
