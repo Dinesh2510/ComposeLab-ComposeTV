@@ -8,7 +8,7 @@
 [![Compose TV](https://img.shields.io/badge/Compose%20TV-1.1.0-3DDC84?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/training/tv)
 [![Android](https://img.shields.io/badge/Platform-Android%20TV-000000?style=for-the-badge&logo=android&logoColor=white)](https://www.android.com/tv/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/dinesh2510/compose-lab-tv?style=for-the-badge)](https://github.com/dinesh2510/compose-lab-tv/stargazers)
+[![Stars](https://img.shields.io/github/stars/dinesh2510/compose-lab-tv?style=for-the-badge)](https://github.com/Dinesh2510/ComposeLab-ComposeTV/stargazers)
 
 **A complete, production-style Android TV app demo — built with Jetpack Compose for TV, Hilt, Room, Paging 3, Ktor & Retrofit — showcasing real-world architecture patterns for TV app development.**
 
@@ -198,7 +198,7 @@ app/
 
 ```bash
 # Clone the repository
-git clone https://github.com/dinesh2510/compose-lab-tv.git
+git clone https://github.com/Dinesh2510/compose-lab-tv.git
 
 # Open in Android Studio
 cd compose-lab-tv
@@ -208,7 +208,7 @@ cd compose-lab-tv
 
 ### 📥 Download
 
-You can download the latest APK from the [Releases](https://github.com/dinesh2510/compose-lab-tv/releases) section.
+You can download the latest APK from the [Releases](https://github.com/Dinesh2510/compose-lab-tv/releases) section.
 
 ---
 
@@ -222,7 +222,7 @@ Contributions, issues, and feature requests are welcome!
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-Feel free to check the [issues page](https://github.com/dinesh2510/compose-lab-tv/issues).
+Feel free to check the [issues page](https://github.com/Dinesh2510/compose-lab-tv/issues).
 
 ---
 
@@ -242,9 +242,9 @@ This project is created **strictly for educational and portfolio purposes** to d
 
 **Your Name**
 
-- GitHub: [@dinesh2510](https://github.com/dinesh2510)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/dineshchavan2510)
-- YouTube: [Your Channel](https://youtube.com/@pixeldesigndeveloper)
+- GitHub: [@Dinesh2510](https://github.com/Dinesh2510)
+- LinkedIn: [in/dineshchavan2510](https://linkedin.com/in/dineshchavan2510)
+- YouTube: [@pixeldesigndeveloper](https://youtube.com/@pixeldesigndeveloper)
 	
 ---
 
