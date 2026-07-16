@@ -1,5 +1,9 @@
-<div align="center">
 
+<div align="center">
+<div style="text-align:center;">
+    <img src="screenshots/10.png" style="width:270px;">
+</div>
+	
 # 📺 Compose Lab - Compose TV
 
 ### A modern Android TV application built entirely with Jetpack Compose for TV
@@ -8,7 +12,8 @@
 [![Compose TV](https://img.shields.io/badge/Compose%20TV-1.1.0-3DDC84?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/training/tv)
 [![Android](https://img.shields.io/badge/Platform-Android%20TV-000000?style=for-the-badge&logo=android&logoColor=white)](https://www.android.com/tv/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/dinesh2510/compose-lab-tv?style=for-the-badge)](https://github.com/Dinesh2510/ComposeLab-ComposeTV/stargazers)
+[![Stars](https://img.shields.io/github/stars/Dinesh2510/ComposeLab-ComposeTV?style=for-the-badge)](https://github.com/Dinesh2510/ComposeLab-ComposeTV/stargazers)
+
 
 **A complete, production-style Android TV app demo — built with Jetpack Compose for TV, Hilt, Room, Paging 3, Ktor & Retrofit — showcasing real-world architecture patterns for TV app development.**
 
@@ -50,17 +55,17 @@ It's designed as both a **learning resource** for developers exploring Compose f
 
 ## 📱 Screens
 
-| Splash Screen | Onboarding | Dashboard / Home |
-|:---:|:---:|:---:|
-| <img src="screenshots/splash.png" width="270"/> | <img src="screenshots/onboarding.png" width="270"/> | <img src="screenshots/dashboard.png" width="270"/> |
+|               Splash Screen                |                 Home                 |              Home Details              |
+|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|
+| <img src="screenshots/1.png" width="270"/> | <img src="screenshots/2.png" width="270"/> | <img src="screenshots/3.png" width="270"/> |
 
-| Home Details | Media Player | Search |
-|:---:|:---:|:---:|
-| <img src="screenshots/home_details.png" width="270"/> | <img src="screenshots/media_player.png" width="270"/> | <img src="screenshots/search.png" width="270"/> |
+|                Search                |                Search Result                |                   Wishlist                   |
+|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|
+| <img src="screenshots/4.png" width="270"/> | <img src="screenshots/5.png" width="270"/> | <img src="screenshots/6.png" width="270"/> |
 
-| Wishlist / Favorites | Settings | Privacy Policy / Terms |
-|:---:|:---:|:---:|
-| <img src="screenshots/wishlist.png" width="270"/> | <img src="screenshots/settings.png" width="270"/> | <img src="screenshots/privacy_terms.png" width="270"/> |
+|            Privacy Policy / Terms            |                  Settings                  | Media |
+|:------------------------------------------:|:------------------------------------------:|:---:|
+| <img src="screenshots/7.png" width="270"/> | <img src="screenshots/8.png" width="270"/> | <img src="screenshots/9.png" width="270"/> |
 
 ---
 
